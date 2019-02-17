@@ -1,0 +1,6 @@
+tree	:	[
+	{
+		dialog_node: "example node",
+		unknownAttribute: "unknown"
+	}
+]

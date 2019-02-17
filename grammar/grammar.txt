@@ -1,0 +1,528 @@
+/**
+ * Grammar created for translating a decision tree into
+ * NodeJS code for creating an IBM Watson chatbot.
+ * 
+ * Grammar created by Walt Loumakis
+ */
+
+/**************************************************************************/
+/*                               Universals                               */
+/**************************************************************************/
+
+boolean	:	TRUE
+		|	FALSE
+
+/**************************************************************************/
+/*                               Workspaces                               */
+/**************************************************************************/
+
+workspaces	:	workspace
+			|	workspace COMMA workspaces
+
+workspace	:	WORKSPACE COLON OBRACKET workspaceObjs CBRACKET
+
+workspaceObjs	:	workspaceObj
+				|	workspaceObj COMMA workspaceObjs
+
+workspaceObj	:	OBRACE workspaceAttributes CBRACE
+
+workspaceAttributes	:	workspaceAttribute
+					|	workspaceAttribute COMMA workspaceAttributes
+
+workspaceAttribute	:	name
+					|	description
+					|	language
+					|	intentsBlock
+					|	entitiesBlock
+					|	tree
+					|	counterExamples	//TODO: Expand this in grammar and recognizer
+					|	metadata
+					|	learning_opt_out
+					|	system_settings
+
+name	:	NAME COLON STRING
+
+language	:	LANGUAGE COLON STRING
+
+learning_opt_out	:	LEARNING_OPT_OUT COLON boolean
+
+system_settings	:	SYSTEM_SETTINGS COLON systemSettingsObj
+
+systemSettingsObj	:	OBRACE systemSettingsAttributes CBRACE
+
+systemSettingsAttributes	:	systemSettingsAttribute
+							|	systemSettingsAttribute COMMA systemSettingsAttributes
+
+systemSettingsAttribute	:	tooling
+						|	disambiguation
+						|	human_agent_assist
+
+tooling	:	TOOLING COLON toolingObj
+
+toolingObj	:	OBRACE storeGenericResponses CBRACE
+
+storeGenericResponses	:	STORE_GENERIC_RESPONSES COLON boolean
+
+disambiguation	:	DISAMBIGUATION COLON OBRACE disambiguationAttributes CBRACE
+
+disambiguationAttributes	:	disambiguationAttribute
+							|	disambiguationAttribute COMMA disambiguationAttributes
+
+disambiguationAttribute	:	prompt
+						|	none_of_the_above_prompt
+						|	enabled
+						|	sensitivity
+
+prompt	:	PROMPT COLON STRING
+
+none_of_the_above_prompt	:	NONE_OF_THE_ABOVE_PROMPT COLON STRING
+
+enabled	:	ENABLED COLON boolean
+
+sensitivity	:	SENSITIVITY COLON STRING
+
+human_agent_assist	:	HUMAN_AGENT_ASSIST COLON OBRACE humanAgentAssistAttributes CBRACE
+
+humanAgentAssistAttributes	:	humanAgentAssistAttribute
+							|	humanAgentAssistAttribute COMMA humanAgentAssistAttributes
+
+//TODO: Figure out a more comprehensive list of humanAgentAssist attributes.
+humanAgentAssistAttribute	:	*EMPTY*
+
+/**************************************************************************/
+/*                                Intents                                 */
+/**************************************************************************/
+
+intentsBlock	:	INTENTS COLON OBRACKET intents CBRACKET
+
+intents	:	intent
+		|	intent COMMA intents
+
+intent	:	OBRACE intentAttributes CBRACE
+
+intentAttributes	:	intentAttribute
+					|	intentAttribute COMMA intentAttributes
+
+intentAttribute	:	intentName
+				|	description
+				|	userExamples
+
+intentName	:	INTENT COLON STRING
+
+userExamples	:	userExample
+				|	userExample COMMA userExamples
+
+userExample	:	EXAMPLES COLON OBRACKET examples CBRACKET
+
+examples	:	example
+			|	example COMMA examples
+
+example	:	OBRACE exampleAttributes CBRACE
+
+exampleAttributes	:	exampleAttribute
+					|	exampleAttribute COMMA exampleAttributes
+
+exampleAttribute	:	text
+					|	mentions
+
+mentions	:	MENTIONS COLON OBRACKET mentionObjs CBRACKET
+
+mentionObjs	:	OBRACE mentionObjsAttributes CBRACE
+
+mentionObjsAttributes	:	mentionObjsAttribute
+						|	mentionObjsAttribute COMMA mentionObjsAttributes
+
+mentionObjsAttribute	:	entityName
+
+/**************************************************************************/
+/*                                Entities                                */
+/**************************************************************************/
+
+entitiesBlock	:	ENTITIES COLON OBRACKET entities CBRACKET
+
+entities	:	entity
+			|	entity COMMA entities
+
+entity	:	OBRACE entityAttributes CBRACE
+
+entityAttributes	:	entityAttribute
+					|	entityAttribute COMMA entityAttributes
+
+entityAttribute	:	entityName
+				|	description
+				|	metadata
+				|	entityValues
+				|	fuzzy_match
+
+entityName	:	ENTITY COLON STRING
+
+entityValues	:	VALUES COLON OBRACKET entityValuesList CBRACKET
+
+entityValuesList	:	entityValue
+					|	entityValue COMMA entityValuesList
+
+entityValue	:	OBRACE entityValueAttributes CBRACE
+
+entityValueAttributes	:	entityValueAttribute
+						|	entityValueAttribute COMMA entityValueAttributes
+
+entityValueAttribute	:	entityValueName
+						|	metadata
+						|	synonyms
+						|	patterns
+						|	entityValueType
+						|	entityValueTypeList
+
+entityValueName	:	VALUE COLON STRING
+
+synonyms	:	SYNONYMS COLON OBRACKET synonymList CBRACKET
+
+synonymList	:	synonym
+			|	synonym COMMA synonymList
+
+synonym	:	SYNONYM COLON STRING
+
+patterns	:	PATTERNS COLON OBRACKET patternList CBRACKET
+
+patternList	:	pattern
+			|	pattern COMMA patternList
+
+pattern	:	PATTERN COLON STRING
+
+entityValueType	:	VALUE_TYPE COLON STRING
+
+/**************************************************************************/
+/*                             Decision Tree                              */
+/**************************************************************************/
+
+//NOTE: The representation of a decision tree as described in this grammar
+// 		is remarkably similar to how Watson takes parameters for dialog nodes.
+//		This is intentional so as to make it easier for a translation from
+//		the grammar to NodeJS code.
+
+// The tree is represented by an array of Objects
+tree	:	TREE COLON OBRACKET nodeList CBRACKET
+
+nodeList	:	node
+			|	node COMMA nodeList
+
+// This is a fancy way of calling a node an Object
+node	:	OBRACE nodeAttributes CBRACE
+
+nodeAttributes	:	nodeAttribute
+				|	nodeAttribute COMMA nodeAttributes
+
+// The idea for this rule is to have the ability to create a node EXACTLY how you want it, despite it not being necessary
+nodeAttribute	:	type					//Can be inferred
+				|	title					//Can be inferred if output is just one non-empty text object
+				|	output					//Can be blank
+				|	metadata				//Can be blank
+				|	conditions				//Required
+				|	dialog_node				//Required. Technically, this can be constructed from other attributes or from a counter, but in order to reduce naming convention confusion, it is required.
+				|	previous_sibling		//Can be blank, but required if wanting to link nodes up properly
+				|	description				//Can be blank
+				|	parent					//Can be blank, but required if wanting to link nodes up properly
+				|	context					//Can be blank
+				|	next_step				//Can be blank
+				|	actions					//Can be blank
+				|	event_name				//Can be blank, unless the type is event_handler
+				|	variable				//Can be blank
+				|	digress_in				//Can be blank
+				|	digress_out				//Can be blank
+				|	digress_out_slots		//Can be blank
+				|	user_label				//Can be blank
+
+/******************/
+/*      Types     */
+/******************/
+
+type	:	TYPE COLON STRING
+
+/******************/
+/*      Title     */
+/******************/
+
+title	:	TITLE COLON STRING
+
+/******************/
+/*     Output     */
+/******************/
+
+output	:	OUTPUT COLON OBRACE optOutputValues CBRACE
+
+optOutputValues	:	outputValues
+				|	*EMPTY*
+
+outputValues	:	outputValue
+				|	outputValue COMMA outputValues
+
+outputValue	:	text
+			|	pause
+			|	image
+			|	option
+			|	connect_to_agent
+
+///////////////////////
+//       Text        //
+///////////////////////
+
+text	:	TEXT COLON textChoice
+
+textChoice	:	STRING
+			|	textValuesObj
+
+textValuesObj	:	OBRACE textValuesObjAttributes CBRACE
+
+textValuesObjAttributes	:	textValuesObjAttribute
+						|	textValuesObjAttribute COMMA textValuesObjAttributes
+
+textValuesObjAttribute	:	values
+						|	selectionPolicy
+						|	delimeter
+
+values	:	VALUES COLON OBRACKET stringList CBRACKET
+
+stringList	:	STRING
+			|	STRING COMMA stringList
+
+selectionPolicy	:	SELECTION_POLICY COLON STRING
+
+//NOTE: Limited to CHARs. Since \n is a character, it would be subsumed into the CHAR category
+delimeter	:	DELIMETER COLON STRING
+
+///////////////////////
+//       Pause       //
+///////////////////////
+
+pause	:	PAUSE COLON OBRACE pauseAttributes CBRACE
+
+pauseAttributes	:	pauseAttribute
+				|	pauseAttribute COMMA pauseAttributes
+
+pauseAttribute	:	time
+				|	typing
+
+time	:	TIME COLON NUMBER
+
+typing	:	TYPING COLON boolean
+
+///////////////////////
+//       Image       //
+///////////////////////
+
+image	:	IMAGE COLON OBRACE imageAttributes CBRACE
+
+imageAttributes	:	imageAttribute
+				|	imageAttribute COMMA imageAttributes
+
+imageAttribute	:	source
+				|	title
+				|	description
+
+source	:	SOURCE COLON STRING
+
+///////////////////////
+//      Option       //
+///////////////////////
+
+option	:	OPTION COLON OBRACE optionAttributes CBRACE
+
+optionAttributes	:	optionAttribute
+					|	optionAttribute COMMA optionAttributes
+
+optionAttribute	:	title
+				|	description
+				|	preference
+				|	options
+
+preference	:	PREFERENCE COLON STRING
+
+options	:	OBRACKET optionsObjList CBRACKET
+
+optionsObjList	:	optionsObj
+				|	optionsObj COMMA optionsObjList
+
+optionsObj	:	OBRACE optionsObjAttributes CBRACE
+
+optionsObjAttributes	:	optionsObjAttribute
+						|	optionsObjAttribute COMMA optionsObjAttributes
+
+optionsObjAttribute	:	label
+					|	value
+
+label	:	LABEL COLON STRING
+
+value	:	VALUE COLON inputDataObj
+
+inputDataObj	:	OBRACE inputAttribute CBRACE
+
+inputAttribute	:	TEXT COLON STRING
+
+///////////////////////
+// Connect to Agent  //
+///////////////////////
+
+connect_to_agent	:	CONNECT_TO_AGENT COLON connectToAgentObj
+
+connectToAgentObj	:	OBRACE connectToAgentObjAttribute CBRACE
+
+connectToAgentObjAttribute	:	MESSAGE_TO_HUMAN_AGENT COLON STRING
+
+/******************/
+/*    Metadata    */
+/******************/
+
+metadata	:	METADATA COLON metadataObj
+
+metadataObj	:	OBRACE optMetadataAttributes CBRACE
+
+optMetadataAttributes	:	metadataAttributes
+						|	*EMPTY*
+
+metadataAttributes	:	metadataAttribute
+					|	metadataAttribute COMMA metadataAttributes
+
+//TODO: Figure out a more comprehensive list of metadata attributes.
+metadataAttribute	:	fallback
+
+fallback	:	FALLBACK COLON STRING
+
+/******************/
+/*   Conditions   */
+/******************/
+
+//NOTE: this is a very broad definition of a conditions attribute.
+//		To be more specific, a conditions attribute is comprised of differing types of variables joined by boolean evaluators.
+//		I.e., conditions : "$contextVar && #intentVar || @entityVar"
+//		To counteract this broadness, the lexer will handle the different types of vars available.
+
+conditions	:	CONDITIONS COLON STRING
+
+/******************/
+/*  Dialog Node   */
+/******************/
+
+dialog_node	:	DIALOG_NODE COLON STRING
+
+/******************/
+/*  Prev Sibling  */
+/******************/
+
+previous_sibling	:	PREVIOUS_SIBLING COLON STRING
+
+/******************/
+/*   Description  */
+/******************/
+
+description	:	DESCRIPTION COLON STRING
+
+/******************/
+/*     Parent     */
+/******************/
+
+parent	:	PARENT COLON STRING
+
+/******************/
+/*     Context    */
+/******************/
+
+context	:	CONTEXT COLON contextObj
+
+contextObj	:	OBRACE contextObjAttributes	CBRACE
+
+contextObjAttributes	:	contextObjAttribute
+						|	contextObjAttribute COMMA contextObjAttributes
+
+//TODO: Figure out a more comprehensive list of context attributes.
+contextObjAttribute	:	*EMPTY*
+
+/******************/
+/*    Next Step   */
+/******************/
+
+next_step	:	NEXT_STEP COLON nextStepObj
+
+nextStepObj	:	OBRACE nextStepObjAttributes CBRACE
+
+nextStepObjAttributes	:	nextStepObjAttribute
+						|	nextStepObjAttribute COMMA nextStepObjAttributes
+
+nextStepObjAttribute	:	behavior
+						|	dialog_node
+						|	selector
+
+behavior	:	BEHAVIOR COLON STRING
+
+selector	:	SELECTOR COLON STRING
+
+/******************/
+/*     Actions    */
+/******************/
+
+actions	:	ACTIONS COLON OBRACKET actionsObjList CBRACKET
+
+actionsObjList	:	actionsObj
+				|	actionsObj COMMA actionsObjList
+
+actionsObj	:	OBRACE actionsObjAttributes CBRACE
+
+actionsObjAttributes	:	actionsObjAttribute
+						|	actionsObjAttribute COMMA actionsObjAttributes
+
+actionsObjAttribute	:	name
+					|	action_type
+					|	parameters
+					|	result_variable
+					|	credentials
+
+action_type	:	ACTION_TYPE COLON STRING
+
+parameters	:	PARAMETERS COLON parametersObj
+
+parametersObj	:	OBRACE parametersAttributes CBRACE
+
+parametersAttributes	:	parametersAttribute
+						|	parametersAttribute COMMA parametersAttributes
+
+//TODO: Figure out a more comprehensive list of parameters attributes.
+parametersAttribute	:	*EMPTY*
+
+result_variable	:	RESULT_VARIABLE COLON STRING
+
+credentials	:	CREDENTIALS COLON STRING
+
+/******************/
+/*   Event Name   */
+/******************/
+
+event_name	:	EVENT_NAME COLON STRING
+
+/******************/
+/*    Variable    */
+/******************/
+
+variable	:	VARIABLE COLON STRING
+
+/******************/
+/*   Digress In   */
+/******************/
+
+digress_in	:	DIGRESS_IN COLON STRING
+
+/******************/
+/*   Digress Out  */
+/******************/
+
+digress_out	:	DIGRESS_OUT COLON STRING
+
+/******************/
+/* Dgrs Out Slots */
+/******************/
+
+digress_out_slots	:	DIGRESS_OUT_SLOTS COLON STRING
+
+/******************/
+/*   User Label   */
+/******************/
+
+user_label	:	USER_LABEL COLON STRING
