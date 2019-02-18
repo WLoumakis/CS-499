@@ -41,6 +41,7 @@ extern char *CBRACE;
 extern char *WORKSPACE;
 extern char *NAME;
 extern char *LANGUAGE;
+extern char *COUNTEREXAMPLES;
 extern char *LEARNING_OPT_OUT;
 extern char *SYSTEM_SETTINGS;
 extern char *TOOLING;
@@ -74,6 +75,7 @@ extern char *SYNONYM;
 extern char *PATTERNS;
 extern char *PATTERN;
 extern char *VALUE_TYPE;
+extern char *FUZZY_MATCH;
 
 /**************************************************************************/
 /*                             Decision Tree                              */

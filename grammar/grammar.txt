@@ -35,7 +35,7 @@ workspaceAttribute	:	name
 					|	intentsBlock
 					|	entitiesBlock
 					|	tree
-					|	counterExamples	//TODO: Expand this in grammar and recognizer
+					|	counterExamples
 					|	metadata
 					|	learning_opt_out
 					|	system_settings
@@ -43,6 +43,13 @@ workspaceAttribute	:	name
 name	:	NAME COLON STRING
 
 language	:	LANGUAGE COLON STRING
+
+counterExamples	:	COUNTEREXAMPLES COLON OBRACKET counterExamplesList CBRACKET
+
+counterExamplesList	:	counterExample
+					|	counterExample COMMA counterExamplesList
+
+counterExample	:	TEXT COLON STRING
 
 learning_opt_out	:	LEARNING_OPT_OUT COLON boolean
 
@@ -171,7 +178,6 @@ entityValueAttribute	:	entityValueName
 						|	synonyms
 						|	patterns
 						|	entityValueType
-						|	entityValueTypeList
 
 entityValueName	:	VALUE COLON STRING
 
@@ -190,6 +196,8 @@ patternList	:	pattern
 pattern	:	PATTERN COLON STRING
 
 entityValueType	:	VALUE_TYPE COLON STRING
+
+fuzzy_match	:	FUZZY_MATCH COLON boolean
 
 /**************************************************************************/
 /*                             Decision Tree                              */

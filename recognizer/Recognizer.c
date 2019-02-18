@@ -5,6 +5,9 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "Recognizer.h"
 #include "Lexeme.h"
 #include "Types.h"
 #include "Lexer.h"
@@ -12,7 +15,6 @@
 #define null NULL
 
 Lexeme *current;
-
 
 /**************************************************************************/
 /*                     Grammar Rule Method Prototypes                     */
@@ -23,8 +25,6 @@ Lexeme *current;
 /*************************************/
 
 static void boolean();
-
-static int booleanPending();
 
 /*************************************/
 /*            Workspaces             */
@@ -38,6 +38,9 @@ static void workspaceAttributes();
 static void workspaceAttribute();
 static void name();
 static void language();
+static void counterExamples();
+static void counterExamplesList();
+static void counterExample();
 static void learning_opt_out();
 static void system_settings();
 static void systemSettingsObj();
@@ -57,32 +60,15 @@ static void human_agent_assist();
 static void humanAgentAssistAttributes();
 static void humanAgentAssistAttribute();
 
-static int workspacesPending();
-static int workspacePending();
-static int workspaceObjsPending();
-static int workspaceObjPending();
-static int workspaceAttributesPending();
-static int workspaceAttributePending();
 static int namePending();
 static int languagePending();
+static int counterExamplesPending();
 static int learning_opt_outPending();
-static int system_settingsPending();
-static int systemSettingsObjPending();
-static int systemSettingsAttributesPending();
-static int systemSettingsAttributePending();
 static int toolingPending();
-static int toolingObjPending();
-static int storeGenericResponsesPending();
 static int disambiguationPending();
-static int disambiguationAttributesPending();
-static int disambiguationAttributePending();
 static int promptPending();
 static int none_of_the_above_promptPending();
 static int enabledPending();
-static int sensitivityPending();
-static int human_agent_assistPending();
-static int humanAgentAssistAttributesPending();
-static int humanAgentAssistAttributePending();
 
 /*************************************/
 /*              Intents              */
@@ -95,6 +81,7 @@ static void intentAttributes();
 static void intentAttribute();
 static void intentName();
 static void userExamples();
+static void userExample();
 static void examples();
 static void example();
 static void exampleAttributes();
@@ -105,20 +92,7 @@ static void mentionObjsAttributes();
 static void mentionObjsAttribute();
 
 static int intentsBlockPending();
-static int intentsPending();
-static int intentPending();
-static int intentAttributesPending();
-static int intentAttributePending();
 static int intentNamePending();
-static int userExamplesPending();
-static int examplesPending();
-static int examplePending();
-static int exampleAttributesPending();
-static int exampleAttributePending();
-static int mentionsPending();
-static int mentionObjsPending();
-static int mentionObjsAttributesPending();
-static int mentionObjsAttributePending();
 
 /*************************************/
 /*             Entities              */
@@ -143,26 +117,14 @@ static void patterns();
 static void patternList();
 static void pattern();
 static void entityValueType();
+static void fuzzy_match();
 
 static int entitiesBlockPending();
-static int entitiesPending();
-static int entityPending();
-static int entityAttributesPending();
-static int entityAttributePending();
 static int entityNamePending();
 static int entityValuesPending();
-static int entityValuesListPending();
-static int entityValuePending();
-static int entityValueAttributesPending();
-static int entityValueAttributePending();
 static int entityValueNamePending();
-static int synonymsPending();
-static int synonymListPending();
 static int synonymPending();
 static int patternsPending();
-static int patternListPending();
-static int patternPending();
-static int entityValueTypePending();
 
 /*************************************/
 /*           Decision Tree           */
@@ -170,13 +132,11 @@ static int entityValueTypePending();
 
 static void tree();
 static void nodeList();
+static void node();
 static void nodeAttributes();
 static void nodeAttribute();
 
 static int treePending();
-static int nodeListPending();
-static int nodeAttributesPending();
-static int nodeAttributePending();
 
 /******************/
 /*      Types     */
@@ -204,7 +164,6 @@ static void outputValues();
 static void outputValue();
 
 static int outputPending();
-static int optOutputValuesPending();
 static int outputValuesPending();
 static int outputValuePending();
 
@@ -223,14 +182,8 @@ static void selectionPolicy();
 static void delimeter();
 
 static int textPending();
-static int textChoicePending();
-static int textValuesObjPending();
-static int textValuesObjAttributesPending();
-static int textValuesObjAttributePending();
 static int valuesPending();
-static int stringListPending();
 static int selectionPolicyPending();
-static int delimeterPending();
 
 ///////////////////////
 //       Pause       //
@@ -243,10 +196,7 @@ static void time();
 static void typing();
 
 static int pausePending();
-static int pauseAttributesPending();
-static int pauseAttributePending();
 static int timePending();
-static int typingPending();
 
 ///////////////////////
 //       Image       //
@@ -258,8 +208,6 @@ static void imageAttribute();
 static void source();
 
 static int imagePending();
-static int imageAttributesPending();
-static int imageAttributePending();
 static int sourcePending();
 
 ///////////////////////
@@ -281,18 +229,8 @@ static void inputDataObj();
 static void inputAttribute();
 
 static int optionPending();
-static int optionAttributesPending();
-static int optionAttributePending();
 static int preferencePending();
-static int optionsPending();
-static int optionsObjListPending();
-static int optionsObjPending();
-static int optionsObjAttributesPending();
-static int optionsObjAttributePending();
 static int labelPending();
-static int valuePending();
-static int inputDataObjPending();
-static int inputAttributePending();
 
 ///////////////////////
 // Connect to Agent  //
@@ -303,8 +241,6 @@ static void connectToAgentObj();
 static void connectToAgentObjAttribute();
 
 static int connect_to_agentPending();
-static int connectToAgentObjPending();
-static int connectToAgentObjAttributePending();
 
 /******************/
 /*    Metadata    */
@@ -318,8 +254,6 @@ static void metadataAttribute();
 static void fallback();
 
 static int metadataPending();
-static int metadataObjPending();
-static int optMetadataAttributesPending();
 static int metadataAttributesPending();
 static int metadataAttributePending();
 static int fallbackPending();
@@ -374,9 +308,6 @@ static void contextObjAttributes();
 static void contextObjAttribute();
 
 static int contextPending();
-static int contextObjPending();
-static int contextObjAttributesPending();
-static int contextObjAttributePending();
 
 /******************/
 /*    Next Step   */
@@ -390,11 +321,7 @@ static void behavior();
 static void selector();
 
 static int next_stepPending();
-static int nextStepObjPending();
-static int nextStepObjAttributesPending();
-static int nextStepObjAttributePending();
 static int behaviorPending();
-static int selectorPending();
 
 /******************/
 /*     Actions    */
@@ -414,17 +341,9 @@ static void result_variable();
 static void credentials();
 
 static int actionsPending();
-static int actionsObjListPending();
-static int actionsObjPending();
-static int actionsObjAttributesPending();
-static int actionsObjAttributePending();
 static int action_typePending();
 static int parametersPending();
-static int parametersObjPending();
-static int parametersAttributesPending();
-static int parametersAttributePending();
 static int result_variablePending();
-static int credentialsPending();
 
 /******************/
 /*   Event Name   */
@@ -472,8 +391,6 @@ static int digress_out_slotsPending();
 
 static void user_label();
 
-static int user_labelPending();
-
 /**************************************************************************/
 /*                     Private Recognizing Functions                      */
 /**************************************************************************/
@@ -493,6 +410,7 @@ static void match(char *type) {
 		advance();
 	else {
 		fprintf(stderr, "Error on line %d: Expected %s, got %s.\n", getLine(current), type, getType(current));
+		printf("illegal\n");
 		exit(2);
 	}
 }
@@ -513,6 +431,7 @@ void recognize() {
 	current = lex();
 	workspaces();
 	match(ENDofINPUT);
+	printf("legal\n");
 }
 
 /**************************************************************************/
@@ -528,11 +447,6 @@ static void boolean() {
 		advance();
 	else if (check(FALSEVAL))
 		advance();
-}
-
-static int booleanPending() {
-	return (check(TRUEVAL) ||
-			check(FALSEVAL));
 }
 
 /*************************************/
@@ -590,7 +504,8 @@ static void workspaceAttribute() {
 		entitiesBlock();
 	else if (treePending())
 		tree();
-	//TODO: else if (counterExamplesPending)
+	else if (counterExamplesPending())
+		counterExamples();
 	else if (metadataPending())
 		metadata();
 	else if (learning_opt_outPending())
@@ -607,6 +522,28 @@ static void name() {
 
 static void language() {
 	match(LANGUAGE);
+	match(COLON);
+	match(STRING);
+}
+
+static void counterExamples() {
+	match(COUNTEREXAMPLES);
+	match(COLON);
+	match(OBRACKET);
+	counterExamplesList();
+	match(CBRACKET);
+}
+
+static void counterExamplesList() {
+	counterExample();
+	if (check(COMMA)) {
+		advance();
+		counterExamplesList();
+	}
+}
+
+static void counterExample() {
+	match(TEXT);
 	match(COLON);
 	match(STRING);
 }
@@ -734,39 +671,6 @@ static void humanAgentAssistAttribute() {
 	return;
 }
 
-static int workspacesPending() {
-	return workspacePending();
-}
-
-static int workspacePending() {
-	return check(WORKSPACE);
-}
-
-static int workspaceObjsPending() {
-	return workspaceObjPending();
-}
-
-static int workspaceObjPending() {
-	return check(OBRACE);
-}
-
-static int workspaceAttributesPending() {
-	return workspaceAttributePending();
-}
-
-static int workspaceAttributePending() {
-	return (namePending() ||
-			descriptionPending() ||
-			languagePending() ||
-			intentsBlockPending() ||
-			entitiesBlockPending() ||
-			treePending() ||
-//TODO:			counterExamplesPending() ||
-			metadataPending() ||
-			learning_opt_outPending() ||
-			system_settingsPending());
-}
-
 static int namePending() {
 	return check(NAME);
 }
@@ -775,53 +679,20 @@ static int languagePending() {
 	return check(LANGUAGE);
 }
 
+static int counterExamplesPending() {
+	return check(COUNTEREXAMPLES);
+}
+
 static int learning_opt_outPending() {
 	return check(LEARNING_OPT_OUT);
-}
-
-static int system_settingsPending() {
-	return check(SYSTEM_SETTINGS);
-}
-
-static int systemSettingsObjPending() {
-	return check(OBRACE);
-}
-
-static int systemSettingsAttributesPending() {
-	return systemSettingsAttributePending();
-}
-
-static int systemSettingsAttributePending() {
-	return (toolingPending() ||
-			disambiguationPending() ||
-			human_agent_assistPending());
 }
 
 static int toolingPending() {
 	return check(TOOLING);
 }
 
-static int toolingObjPending() {
-	return check(OBRACE);
-}
-
-static int storeGenericResponsesPending() {
-	return check(STORE_GENERIC_RESPONSES);
-}
-
 static int disambiguationPending() {
 	return check(DISAMBIGUATION);
-}
-
-static int disambiguationAttributesPending() {
-	return disambiguationAttributePending();
-}
-
-static int disambiguationAttributePending() {
-	return (promptPending() ||
-			none_of_the_above_promptPending() ||
-			enabledPending() ||
-			sensitivityPending());
 }
 
 static int promptPending() {
@@ -836,1112 +707,1174 @@ static int enabledPending() {
 	return check(ENABLED);
 }
 
-static int sensitivityPending() {
-	return check(SENSITIVITY);
-}
-
-static int human_agent_assistPending() {
-	return check(HUMAN_AGENT_ASSIST);
-}
-
-static int humanAgentAssistAttributesPending() {
-	return humanAgentAssistAttributePending();
-}
-
-//TODO: Figure out a more comprehensive list of humaAgentAssist attributes.
-static int humanAgentAssistAttributePending() {
-	return 0;
-}
-
-
 /*************************************/
 /*              Intents              */
 /*************************************/
 
 static void intentsBlock() {
-	
+	match(INTENTS);
+	match(COLON);
+	match(OBRACKET);
+	intents();
+	match(CBRACKET);
 }
 
 static void intents() {
-
+	intent();
+	if (check(COMMA)) {
+		advance();
+		intents();
+	}
 }
 
 static void intent() {
-
+	match(OBRACE);
+	intentAttributes();
+	match(CBRACE);
 }
 
 static void intentAttributes() {
-
+	intentAttribute();
+	if (check(COMMA)) {
+		advance();
+		intentAttributes();
+	}
 }
 
 static void intentAttribute() {
-
+	if (intentNamePending())
+		intentName();
+	else if (descriptionPending())
+		description();
+	else
+		userExamples();
 }
 
 static void intentName() {
-
+	match(INTENT);
+	match(COLON);
+	match(STRING);
 }
 
 static void userExamples() {
+	userExample();
+	if (check(COMMA)) {
+		advance();
+		userExamples();
+	}
+}
 
+static void userExample() {
+	match(EXAMPLES);
+	match(COLON);
+	match(OBRACKET);
+	examples();
+	match(CBRACKET);
 }
 
 static void examples() {
-
+	example();
+	if (check(COMMA)) {
+		advance();
+		examples();
+	}
 }
 
 static void example() {
-
+	match(OBRACE);
+	exampleAttributes();
+	match(CBRACE);
 }
 
 static void exampleAttributes() {
-
+	exampleAttribute();
+	if (check(COMMA)) {
+		advance();
+		exampleAttributes();
+	}
 }
 
 static void exampleAttribute() {
-
+	if (textPending())
+		text();
+	else
+		mentions();
 }
 
 static void mentions() {
-
+	match(MENTIONS);
+	match(COLON);
+	match(OBRACKET);
+	mentionObjs();
+	match(CBRACKET);
 }
 
 static void mentionObjs() {
-
+	match(OBRACE);
+	mentionObjsAttributes();
+	match(CBRACE);
 }
 
 static void mentionObjsAttributes() {
-
+	mentionObjsAttribute();
+	if (check(COMMA)) {
+		advance();
+		mentionObjsAttributes();
+	}
 }
 
 static void mentionObjsAttribute() {
-
+	entityName();
 }
-
 
 static int intentsBlockPending() {
-
-}
-
-static int intentsPending() {
-
-}
-
-static int intentPending() {
-
-}
-
-static int intentAttributesPending() {
-
-}
-
-static int intentAttributePending() {
-
+	return check(INTENTS);
 }
 
 static int intentNamePending() {
-
+	return check(INTENT);
 }
-
-static int userExamplesPending() {
-
-}
-
-static int examplesPending() {
-
-}
-
-static int examplePending() {
-
-}
-
-static int exampleAttributesPending() {
-
-}
-
-static int exampleAttributePending() {
-
-}
-
-static int mentionsPending() {
-
-}
-
-static int mentionObjsPending() {
-
-}
-
-static int mentionObjsAttributesPending() {
-
-}
-
-static int mentionObjsAttributePending() {
-
-}
-
 
 /*************************************/
 /*             Entities              */
 /*************************************/
 
 static void entitiesBlock() {
-
+	match(ENTITIES);
+	match(COLON);
+	match(OBRACKET);
+	entities();
+	match(CBRACKET);
 }
 
 static void entities() {
-
+	entity();
+	if (check(COMMA)) {
+		advance();
+		entities();
+	}
 }
 
 static void entity() {
-
+	match(OBRACE);
+	entityAttributes();
+	match(CBRACE);
 }
 
 static void entityAttributes() {
-
+	entityAttribute();
+	if (check(COMMA)) {
+		advance();
+		entityAttributes();
+	}
 }
 
 static void entityAttribute() {
-
+	if (entityNamePending())
+		entityName();
+	else if (descriptionPending())
+		description();
+	else if (metadataPending())
+		metadata();
+	else if (entityValuesPending())
+		entityValues();
+	else
+		fuzzy_match();
 }
 
 static void entityName() {
-
+	match(ENTITY);
+	match(COLON);
+	match(STRING);
 }
 
 static void entityValues() {
-
+	match(VALUES);
+	match(COLON);
+	match(OBRACKET);
+	entityValuesList();
+	match(CBRACKET);
 }
 
 static void entityValuesList() {
-
+	entityValue();
+	if (check(COMMA)) {
+		advance();
+		entityValuesList();
+	}
 }
 
 static void entityValue() {
-
+	match(OBRACE);
+	entityValueAttributes();
+	match(CBRACE);
 }
 
 static void entityValueAttributes() {
-
+	entityValueAttribute();
+	if (check(COMMA)) {
+		advance();
+		entityValueAttributes();
+	}
 }
 
 static void entityValueAttribute() {
-
+	if (entityValueNamePending())
+		entityValueName();
+	else if (metadataPending())
+		metadata();
+	else if (synonymPending())
+		synonyms();
+	else if (patternsPending())
+		patterns();
+	else
+		entityValueType();
 }
 
 static void entityValueName() {
-
+	match(VALUE);
+	match(COLON);
+	match(STRING);
 }
 
 static void synonyms() {
-
+	match(SYNONYMS);
+	match(COLON);
+	match(OBRACKET);
+	synonymList();
+	match(CBRACKET);
 }
 
 static void synonymList() {
-
+	synonym();
+	if (check(COMMA)) {
+		advance();
+		synonymList();
+	}
 }
 
 static void synonym() {
-
+	match(SYNONYM);
+	match(COLON);
+	match(STRING);
 }
 
 static void patterns() {
-
+	match(PATTERNS);
+	match(COLON);
+	match(OBRACKET);
+	patternList();
+	match(CBRACKET);
 }
 
 static void patternList() {
-
+	pattern();
+	if (check(COMMA)) {
+		advance();
+		patternList();
+	}
 }
 
 static void pattern() {
-
+	match(PATTERN);
+	match(COLON);
+	match(STRING);
 }
 
 static void entityValueType() {
-
+	match(VALUE_TYPE);
+	match(COLON);
+	match(STRING);
 }
 
+static void fuzzy_match() {
+	match(FUZZY_MATCH);
+	match(COLON);
+	boolean();
+}
 
 static int entitiesBlockPending() {
-
-}
-
-static int entitiesPending() {
-
-}
-
-static int entityPending() {
-
-}
-
-static int entityAttributesPending() {
-
-}
-
-static int entityAttributePending() {
-
+	return check(ENTITIES);
 }
 
 static int entityNamePending() {
-
+	return check(ENTITY);
 }
 
 static int entityValuesPending() {
-
-}
-
-static int entityValuesListPending() {
-
-}
-
-static int entityValuePending() {
-
-}
-
-static int entityValueAttributesPending() {
-
-}
-
-static int entityValueAttributePending() {
-
+	return check(VALUES);
 }
 
 static int entityValueNamePending() {
-
-}
-
-static int synonymsPending() {
-
-}
-
-static int synonymListPending() {
-
+	return check(VALUE);
 }
 
 static int synonymPending() {
-
+	return check(SYNONYM);
 }
 
 static int patternsPending() {
-
+	return check(PATTERNS);
 }
-
-static int patternListPending() {
-
-}
-
-static int patternPending() {
-
-}
-
-static int entityValueTypePending() {
-
-}
-
 
 /*************************************/
 /*           Decision Tree           */
 /*************************************/
 
 static void tree() {
-
+	match(TREE);
+	match(COLON);
+	match(OBRACKET);
+	nodeList();
+	match(CBRACKET);
 }
 
 static void nodeList() {
+	node();
+	if (check(COMMA)) {
+		advance();
+		nodeList();
+	}
+}
 
+static void node() {
+	match(OBRACE);
+	nodeAttributes();
+	match(CBRACE);
 }
 
 static void nodeAttributes() {
-
+	nodeAttribute();
+	if (check(COMMA)) {
+		advance();
+		nodeAttributes();
+	}
 }
 
 static void nodeAttribute() {
-
+	if (typePending())
+		type();
+	else if (titlePending())
+		title();
+	else if (outputPending())
+		output();
+	else if (metadataPending())
+		metadata();
+	else if (conditionsPending())
+		conditions();
+	else if (dialog_nodePending())
+		dialog_node();
+	else if (previous_siblingPending())
+		previous_sibling();
+	else if (descriptionPending())
+		description();
+	else if (parentPending())
+		parent();
+	else if (contextPending())
+		context();
+	else if (next_stepPending())
+		next_step();
+	else if (actionsPending())
+		actions();
+	else if (event_namePending())
+		event_name();
+	else if (variablePending())
+		variable();
+	else if (digress_inPending())
+		digress_in();
+	else if (digress_outPending())
+		digress_out();
+	else if (digress_out_slotsPending())
+		digress_out_slots();
+	else
+		user_label();
 }
 
 
 static int treePending() {
-
+	return check(TREE);
 }
-
-static int nodeListPending() {
-
-}
-
-static int nodeAttributesPending() {
-
-}
-
-static int nodeAttributePending() {
-
-}
-
 
 /******************/
 /*      Types     */
 /******************/
 
 static void type() {
-
+	match(TYPE);
+	match(COLON);
+	match(STRING);
 }
-
 
 static int typePending() {
-
+	return check(TYPE);
 }
-
 
 /******************/
 /*      Title     */
 /******************/
 
 static void title() {
-
+	match(TITLE);
+	match(COLON);
+	match(STRING);
 }
-
 
 static int titlePending() {
-
+	return check(TITLE);
 }
-
 
 /******************/
 /*     Output     */
 /******************/
 
 static void output() {
-
+	match(OUTPUT);
+	match(COLON);
+	match(OBRACE);
+	optOutputValues();
+	match(CBRACE);
 }
 
 static void optOutputValues() {
-
+	if (outputValuesPending())
+		outputValues();
 }
 
 static void outputValues() {
-
+	outputValue();
+	if (check(COMMA)) {
+		advance();
+		outputValues();
+	}
 }
 
 static void outputValue() {
-
+	if (textPending())
+		text();
+	else if (pausePending())
+		pause();
+	else if (imagePending())
+		image();
+	else if (optionPending())
+		option();
+	else
+		connect_to_agent();
 }
-
 
 static int outputPending() {
-
-}
-
-static int optOutputValuesPending() {
-
+	return check(OUTPUT);
 }
 
 static int outputValuesPending() {
-
+	return outputValuePending();
 }
 
 static int outputValuePending() {
-
+	return (textPending() ||
+			pausePending() ||
+			imagePending() ||
+			optionPending() ||
+			connect_to_agentPending());
 }
-
 
 ///////////////////////
 //       Text        //
 ///////////////////////
 
 static void text() {
-
+	match(TEXT);
+	match(COLON);
+	textChoice();
 }
 
 static void textChoice() {
-
+	if (check(STRING))
+		match(STRING);
+	else
+		textValuesObj();
 }
 
 static void textValuesObj() {
-
+	match(OBRACE);
+	textValuesObjAttributes();
+	match(CBRACE);
 }
 
 static void textValuesObjAttributes() {
-
+	textValuesObjAttribute();
+	if (check(COMMA)) {
+		advance();
+		textValuesObjAttributes();
+	}
 }
 
 static void textValuesObjAttribute() {
-
+	if (valuesPending())
+		values();
+	else if (selectionPolicyPending())
+		selectionPolicy();
+	else
+		delimeter();
 }
 
 static void values() {
-
+	match(VALUES);
+	match(COLON);
+	match(OBRACKET);
+	stringList();
+	match(CBRACKET);
 }
 
 static void stringList() {
-
+	match(STRING);
+	if (check(COMMA)) {
+		advance();
+		stringList();
+	}
 }
 
 static void selectionPolicy() {
-
+	match(SELECTION_POLICY);
+	match(COLON);
+	match(STRING);
 }
 
 static void delimeter() {
-
+	match(DELIMETER);
+	match(COLON);
+	match(STRING);
 }
-
 
 static int textPending() {
-
-}
-
-static int textChoicePending() {
-
-}
-
-static int textValuesObjPending() {
-
-}
-
-static int textValuesObjAttributesPending() {
-
-}
-
-static int textValuesObjAttributePending() {
-
+	return check(TEXT);
 }
 
 static int valuesPending() {
-
-}
-
-static int stringListPending() {
-
+	return check(VALUES);
 }
 
 static int selectionPolicyPending() {
-
+	return check(SELECTION_POLICY);
 }
-
-static int delimeterPending() {
-
-}
-
 
 ///////////////////////
 //       Pause       //
 ///////////////////////
 
 static void pause() {
-
+	match(PAUSE);
+	match(COLON);
+	match(OBRACE);
+	pauseAttributes();
+	match(CBRACE);
 }
 
 static void pauseAttributes() {
-
+	pauseAttribute();
+	if (check(COMMA)) {
+		advance();
+		pauseAttributes();
+	}
 }
 
 static void pauseAttribute() {
-
+	if (timePending())
+		time();
+	else
+		typing();
 }
 
 static void time() {
-
+	match(TIME);
+	match(COLON);
+	match(NUMBER);
 }
 
 static void typing() {
-
+	match(TYPING);
+	match(COLON);
+	boolean();
 }
-
 
 static int pausePending() {
-
-}
-
-static int pauseAttributesPending() {
-
-}
-
-static int pauseAttributePending() {
-
+	return check(PAUSE);
 }
 
 static int timePending() {
-
+	return check(TIME);
 }
-
-static int typingPending() {
-
-}
-
 
 ///////////////////////
 //       Image       //
 ///////////////////////
 
 static void image() {
-
+	match(IMAGE);
+	match(COLON);
+	match(OBRACE);
+	imageAttributes();
+	match(CBRACE);
 }
 
 static void imageAttributes() {
-
+	imageAttribute();
+	if (check(COMMA)) {
+		advance();
+		imageAttributes();
+	}
 }
 
 static void imageAttribute() {
-
+	if (sourcePending())
+		source();
+	else if (titlePending())
+		title();
+	else
+		description();
 }
 
 static void source() {
-
+	match(SOURCE);
+	match(COLON);
+	match(STRING);
 }
-
 
 static int imagePending() {
-
-}
-
-static int imageAttributesPending() {
-
-}
-
-static int imageAttributePending() {
-
+	return check(IMAGE);
 }
 
 static int sourcePending() {
-
+	return check(SOURCE);
 }
-
 
 ///////////////////////
 //      Option       //
 ///////////////////////
 
 static void option() {
-
+	match(OPTION);
+	match(COLON);
+	match(OBRACE);
+	optionAttributes();
+	match(CBRACE);
 }
 
 static void optionAttributes() {
-
+	optionAttribute();
+	if (check(COMMA)) {
+		advance();
+		optionAttributes();
+	}
 }
 
 static void optionAttribute() {
-
+	if (titlePending())
+		title();
+	else if (descriptionPending())
+		description();
+	else if (preferencePending())
+		preference();
+	else
+		options();
 }
 
 static void preference() {
-
+	match(PREFERENCE);
+	match(COLON);
+	match(STRING);
 }
 
 static void options() {
-
+	match(OBRACKET);
+	optionsObjList();
+	match(CBRACKET);
 }
 
 static void optionsObjList() {
-
+	optionsObj();
+	if (check(COMMA)) {
+		advance();
+		optionsObjList();
+	}
 }
 
 static void optionsObj() {
-
+	match(OBRACE);
+	optionsObjAttributes();
+	match(CBRACE);
 }
 
 static void optionsObjAttributes() {
-
+	optionsObjAttribute();
+	if (check(COMMA)) {
+		advance();
+		optionsObjAttributes();
+	}
 }
 
 static void optionsObjAttribute() {
-
+	if (labelPending())
+		label();
+	else
+		value();
 }
 
 static void label() {
-
+	match(LABEL);
+	match(COLON);
+	match(STRING);
 }
 
 static void value() {
-
+	match(VALUE);
+	match(COLON);
+	inputDataObj();
 }
 
 static void inputDataObj() {
-
+	match(OBRACE);
+	inputAttribute();
+	match(CBRACE);
 }
 
 static void inputAttribute() {
-
+	match(TEXT);
+	match(COLON);
+	match(STRING);
 }
-
 
 static int optionPending() {
-
-}
-
-static int optionAttributesPending() {
-
-}
-
-static int optionAttributePending() {
-
+	return check(OPTION);
 }
 
 static int preferencePending() {
-
-}
-
-static int optionsPending() {
-
-}
-
-static int optionsObjListPending() {
-
-}
-
-static int optionsObjPending() {
-
-}
-
-static int optionsObjAttributesPending() {
-
-}
-
-static int optionsObjAttributePending() {
-
+	return check(PREFERENCE);
 }
 
 static int labelPending() {
-
+	return check(LABEL);
 }
-
-static int valuePending() {
-
-}
-
-static int inputDataObjPending() {
-
-}
-
-static int inputAttributePending() {
-
-}
-
 
 ///////////////////////
 // Connect to Agent  //
 ///////////////////////
 
 static void connect_to_agent() {
-
+	match(CONNECT_TO_AGENT);
+	match(COLON);
+	connectToAgentObj();
 }
 
 static void connectToAgentObj() {
-
+	match(OBRACE);
+	connectToAgentObjAttribute();
+	match(CBRACE);
 }
 
 static void connectToAgentObjAttribute() {
-
+	match(MESSAGE_TO_HUMAN_AGENT);
+	match(COLON);
+	match(STRING);
 }
-
 
 static int connect_to_agentPending() {
-
+	return check(CONNECT_TO_AGENT);
 }
-
-static int connectToAgentObjPending() {
-
-}
-
-static int connectToAgentObjAttributePending() {
-
-}
-
 
 /******************/
 /*    Metadata    */
 /******************/
 
 static void metadata() {
-
+	match(METADATA);
+	match(COLON);
+	metadataObj();
 }
 
 static void metadataObj() {
-
+	match(OBRACE);
+	optMetadataAttributes();
+	match(CBRACE);
 }
 
 static void optMetadataAttributes() {
-
+	if (metadataAttributesPending())
+		metadataAttributes();
 }
 
 static void metadataAttributes() {
-
+	metadataAttribute();
+	if (check(COMMA)) {
+		advance();
+		metadataAttributes();
+	}
 }
 
 static void metadataAttribute() {
-
+	if (fallbackPending())
+		fallback();
 }
 
 static void fallback() {
-
+	match(FALLBACK);
+	match(COLON);
+	match(STRING);
 }
-
 
 static int metadataPending() {
-
-}
-
-static int metadataObjPending() {
-
-}
-
-static int optMetadataAttributesPending() {
-
+	return check(METADATA);
 }
 
 static int metadataAttributesPending() {
-
+	return metadataAttributePending();
 }
 
 static int metadataAttributePending() {
-
+	return (fallbackPending());
 }
 
 static int fallbackPending() {
-
+	return check(FALLBACK);
 }
-
 
 /******************/
 /*   Conditions   */
 /******************/
 
 static void conditions() {
-
+	match(CONDITIONS);
+	match(COLON);
+	match(STRING);
 }
-
 
 static int conditionsPending() {
-
+	return check(CONDITIONS);
 }
-
 
 /******************/
 /*  Dialog Node   */
 /******************/
 
 static void dialog_node() {
-
+	match(DIALOG_NODE);
+	match(COLON);
+	match(STRING);
 }
-
 
 static int dialog_nodePending() {
-
+	return check(DIALOG_NODE);
 }
-
 
 /******************/
 /*  Prev Sibling  */
 /******************/
 
 static void previous_sibling() {
-
+	match(PREVIOUS_SIBLING);
+	match(COLON);
+	match(STRING);
 }
-
 
 static int previous_siblingPending() {
-
+	return check(PREVIOUS_SIBLING);
 }
-
 
 /******************/
 /*   Description  */
 /******************/
 
 static void description() {
-
+	match(DESCRIPTION);
+	match(COLON);
+	match(STRING);
 }
-
 
 static int descriptionPending() {
-
+	return check(DESCRIPTION);
 }
-
 
 /******************/
 /*     Parent     */
 /******************/
 
 static void parent() {
-
+	match(PARENT);
+	match(COLON);
+	match(STRING);
 }
-
 
 static int parentPending() {
-
+	return check(PARENT);
 }
-
 
 /******************/
 /*     Context    */
 /******************/
 
 static void context() {
-
+	match(CONTEXT);
+	match(COLON);
+	contextObj();
 }
 
 static void contextObj() {
-
+	match(OBRACE);
+	contextObjAttributes();
+	match(CBRACE);
 }
 
 static void contextObjAttributes() {
-
+	contextObjAttribute();
+	if (check(COMMA)) {
+		advance();
+		contextObjAttributes();
+	}
 }
 
+//TODO: Figure out a more comprehensive list of context attributes.
 static void contextObjAttribute() {
-
+	return;
 }
-
 
 static int contextPending() {
-
+	return check(CONTEXT);
 }
-
-static int contextObjPending() {
-
-}
-
-static int contextObjAttributesPending() {
-
-}
-
-static int contextObjAttributePending() {
-
-}
-
 
 /******************/
 /*    Next Step   */
 /******************/
 
 static void next_step() {
-
+	match(NEXT_STEP);
+	match(COLON);
+	nextStepObj();
 }
 
 static void nextStepObj() {
-
+	match(OBRACE);
+	nextStepObjAttributes();
+	match(CBRACE);
 }
 
 static void nextStepObjAttributes() {
-
+	nextStepObjAttribute();
+	if (check(COMMA)) {
+		advance();
+		nextStepObjAttributes();
+	}
 }
 
 static void nextStepObjAttribute() {
-
+	if (behaviorPending())
+		behavior();
+	else if (dialog_nodePending())
+		dialog_node();
+	else
+		selector();
 }
 
 static void behavior() {
-
+	match(BEHAVIOR);
+	match(COLON);
+	match(STRING);
 }
 
 static void selector() {
-
+	match(SELECTOR);
+	match(COLON);
+	match(STRING);
 }
-
 
 static int next_stepPending() {
-
-}
-
-static int nextStepObjPending() {
-
-}
-
-static int nextStepObjAttributesPending() {
-
-}
-
-static int nextStepObjAttributePending() {
-
+	return check(NEXT_STEP);
 }
 
 static int behaviorPending() {
-
+	return check(BEHAVIOR);
 }
-
-static int selectorPending() {
-
-}
-
 
 /******************/
 /*     Actions    */
 /******************/
 
 static void actions() {
-
+	match(ACTIONS);
+	match(COLON);
+	match(OBRACKET);
+	actionsObjList();
+	match(CBRACKET);
 }
 
 static void actionsObjList() {
-
+	actionsObj();
+	if (check(COMMA)) {
+		advance();
+		actionsObjList();
+	}
 }
 
 static void actionsObj() {
-
+	match(OBRACE);
+	actionsObjAttributes();
+	match(CBRACE);
 }
 
 static void actionsObjAttributes() {
-
+	actionsObjAttribute();
+	if (check(COMMA)) {
+		advance();
+		actionsObjAttributes();
+	}
 }
 
 static void actionsObjAttribute() {
-
+	if (namePending())
+		name();
+	else if (action_typePending())
+		action_type();
+	else if (parametersPending())
+		parameters();
+	else if (result_variablePending())
+		result_variable();
+	else
+		credentials();
 }
 
 static void action_type() {
-
+	match(ACTION_TYPE);
+	match(COLON);
+	match(STRING);
 }
 
 static void parameters() {
-
+	match(PARAMETERS);
+	match(COLON);
+	parametersObj();
 }
 
 static void parametersObj() {
-
+	match(OBRACE);
+	parametersAttributes();
+	match(CBRACE);
 }
 
 static void parametersAttributes() {
-
+	parametersAttribute();
+	if (check(COMMA)) {
+		advance();
+		parametersAttributes();
+	}
 }
 
+//TODO: Figure out a more comprehensive list of parameters attributes.
 static void parametersAttribute() {
-
+	return;
 }
 
 static void result_variable() {
-
+	match(RESULT_VARIABLE);
+	match(COLON);
+	match(STRING);
 }
 
 static void credentials() {
-
+	match(CREDENTIALS);
+	match(COLON);
+	match(STRING);
 }
-
 
 static int actionsPending() {
-
-}
-
-static int actionsObjListPending() {
-
-}
-
-static int actionsObjPending() {
-
-}
-
-static int actionsObjAttributesPending() {
-
-}
-
-static int actionsObjAttributePending() {
-
+	return check(ACTIONS);
 }
 
 static int action_typePending() {
-
+	return check(ACTION_TYPE);
 }
 
 static int parametersPending() {
-
-}
-
-static int parametersObjPending() {
-
-}
-
-static int parametersAttributesPending() {
-
-}
-
-static int parametersAttributePending() {
-
+	return check(PARAMETERS);
 }
 
 static int result_variablePending() {
-
+	return check(RESULT_VARIABLE);
 }
-
-static int credentialsPending() {
-
-}
-
 
 /******************/
 /*   Event Name   */
 /******************/
 
 static void event_name() {
-
+	match(EVENT_NAME);
+	match(COLON);
+	match(STRING);
 }
-
 
 static int event_namePending() {
-
+	return check(EVENT_NAME);
 }
-
 
 /******************/
 /*    Variable    */
 /******************/
 
 static void variable() {
-
+	match(VARIABLE);
+	match(COLON);
+	match(STRING);
 }
-
 
 static int variablePending() {
-
+	return check(VARIABLE);
 }
-
 
 /******************/
 /*   Digress In   */
 /******************/
 
 static void digress_in() {
-
+	match(DIGRESS_IN);
+	match(COLON);
+	match(STRING);
 }
-
 
 static int digress_inPending() {
-
+	return check(DIGRESS_IN);
 }
-
 
 /******************/
 /*   Digress Out  */
 /******************/
 
 static void digress_out() {
-
+	match(DIGRESS_OUT);
+	match(COLON);
+	match(STRING);
 }
-
 
 static int digress_outPending() {
-
+	return check(DIGRESS_OUT);
 }
-
 
 /******************/
 /* Dgrs Out Slots */
 /******************/
 
 static void digress_out_slots() {
-
+	match(DIGRESS_OUT_SLOTS);
+	match(COLON);
+	match(STRING);
 }
-
 
 static int digress_out_slotsPending() {
-
+	return check(DIGRESS_OUT_SLOTS);
 }
-
 
 /******************/
 /*   User Label   */
 /******************/
 
 static void user_label() {
-
+	match(USER_LABEL);
+	match(COLON);
+	match(STRING);
 }
-
-
-static int user_labelPending() {
-
-}
-

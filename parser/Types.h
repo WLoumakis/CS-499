@@ -4,231 +4,271 @@
  * Created by Walt Loumakis
  */
 
+#ifndef __MY_TYPES__
+#define __MY_TYPES__
+
 /**************************************************************************/
 /*                              Bad Lexemes                               */
 /**************************************************************************/
 
-char *BAD_TYPE = "BAD_TYPE";
+extern char *BAD_TYPE;
+extern char *BAD_NUMBER;
+extern char *BAD_BOOL;
 
 /**************************************************************************/
 /*                                Literals                                */
 /**************************************************************************/
 
-char *TRUEVAL = "true";
-char *FALSEVAL = "false";
-char *STRING = "STRING";
-char *NUMBER = "NUMBER";
-char *ENDofINPUT = "ENDofINPUT";
+extern char *TRUEVAL;
+extern char *FALSEVAL;
+extern char *STRING;
+extern char *NUMBER;
+extern char *ENDofINPUT;
 
 /**************************************************************************/
 /*                                Symbols                                 */
 /**************************************************************************/
 
-char *COLON = "COLON";
-char *OBRACKET = "OBRACKET";
-char *CBRACKET = "CBRACKET";
-char *COMMA = "COMMA";
-char *OBRACE = "OBRACE";
-char *CBRACE = "CBRACE";
+extern char *COLON;
+extern char *OBRACKET;
+extern char *CBRACKET;
+extern char *COMMA;
+extern char *OBRACE;
+extern char *CBRACE;
 
 /**************************************************************************/
 /*                               Workspaces                               */
 /**************************************************************************/
 
-char *WORKSPACE = "workspace";
-char *NAME = "name";
-char *LANGUAGE = "language";
-char *COUNTEREXAMPLES = "counterexamples";
-char *LEARNING_OPT_OUT = "learning_opt_out";
-char *SYSTEM_SETTINGS = "system_settings";
-char *TOOLING = "tooling";
-char *STORE_GENERIC_RESPONSES = "store_generic_responses";
-char *DISAMBIGUATION = "disambiguation";
-char *PROMPT = "prompt";
-char *NONE_OF_THE_ABOVE_PROMPT = "none_of_the_above_prompt";
-char *ENABLED = "enabled";
-char *SENSITIVITY = "sensitivity";
-char *HUMAN_AGENT_ASSIST = "human_agent_assist";
+extern char *WORKSPACE;
+extern char *NAME;
+extern char *LANGUAGE;
+extern char *COUNTEREXAMPLES;
+extern char *LEARNING_OPT_OUT;
+extern char *SYSTEM_SETTINGS;
+extern char *TOOLING;
+extern char *STORE_GENERIC_RESPONSES;
+extern char *DISAMBIGUATION;
+extern char *PROMPT;
+extern char *NONE_OF_THE_ABOVE_PROMPT;
+extern char *ENABLED;
+extern char *SENSITIVITY;
+extern char *HUMAN_AGENT_ASSIST;
 
 /**************************************************************************/
 /*                                Intents                                 */
 /**************************************************************************/
 
-char *INTENTS = "intents";
-char *INTENT = "intent";
-char *EXAMPLES = "examples";
-char *MENTIONS = "mentions";
+extern char *INTENTS;
+extern char *INTENT;
+extern char *EXAMPLES;
+extern char *MENTIONS;
 
 /**************************************************************************/
 /*                                Entities                                */
 /**************************************************************************/
 
-char *ENTITIES = "entities";
-char *ENTITY = "entity";
-char *VALUES = "values";
-char *VALUE = "value";
-char *SYNONYMS = "synonyms";
-char *SYNONYM = "synonym";
-char *PATTERNS = "patterns";
-char *PATTERN = "pattern";
-char *VALUE_TYPE = "value_type";
-char *FUZZY_MATCH = "fuzzy_match";
+extern char *ENTITIES;
+extern char *ENTITY;
+extern char *VALUES;
+extern char *VALUE;
+extern char *SYNONYMS;
+extern char *SYNONYM;
+extern char *PATTERNS;
+extern char *PATTERN;
+extern char *VALUE_TYPE;
+extern char *FUZZY_MATCH;
 
 /**************************************************************************/
 /*                             Decision Tree                              */
 /**************************************************************************/
 
-char *TREE = "tree";
+extern char *TREE;
 
 /******************/
 /*     Types      */
 /******************/
 
-char *TYPE = "type";
+extern char *TYPE;
 
 /******************/
 /*     Title      */
 /******************/
 
-char *TITLE = "title";
+extern char *TITLE;
 
 /******************/
 /*     Output     */
 /******************/
 
-char *OUTPUT = "output";
+extern char *OUTPUT;
 
 ///////////////////////
 //       Text        //
 ///////////////////////
 
-char *TEXT = "text";
-char *SELECTION_POLICY = "selection_policy";
-char *DELIMETER = "delimeter";
+extern char *TEXT;
+extern char *SELECTION_POLICY;
+extern char *DELIMETER;
 
 ///////////////////////
 //       Pause       //
 ///////////////////////
 
-char *PAUSE = "pause";
-char *TIME = "time";
-char *TYPING = "typing";
+extern char *PAUSE;
+extern char *TIME;
+extern char *TYPING;
 
 ///////////////////////
 //       Image       //
 ///////////////////////
 
-char *IMAGE = "image";
-char *SOURCE = "source";
+extern char *IMAGE;
+extern char *SOURCE;
 
 ///////////////////////
 //      Option       //
 ///////////////////////
 
-char *OPTION = "option";
-char *PREFERENCE = "preference";
-char *LABEL = "label";
+extern char *OPTION;
+extern char *PREFERENCE;
+extern char *LABEL;
 
 ///////////////////////
 // Connect to Agent  //
 ///////////////////////
 
-char *CONNECT_TO_AGENT = "connect_to_agent";
-char *MESSAGE_TO_HUMAN_AGENT = "message_to_human_agent";
+extern char *CONNECT_TO_AGENT;
+extern char *MESSAGE_TO_HUMAN_AGENT;
 
 /******************/
 /*    Metadata    */
 /******************/
 
-char *METADATA = "metadata";
-char *FALLBACK = "fallback";
+extern char *METADATA;
+extern char *FALLBACK;
 
 /******************/
 /*   Conditions   */
 /******************/
 
-char *CONDITIONS = "conditions";
+extern char *CONDITIONS;
 
 /******************/
 /*  Dialog Node   */
 /******************/
 
-char *DIALOG_NODE = "dialog_node";
+extern char *DIALOG_NODE;
 
 /******************/
 /*  Prev Sibling  */
 /******************/
 
-char *PREVIOUS_SIBLING = "previous_sibling";
+extern char *PREVIOUS_SIBLING;
 
 /******************/
 /*  Description   */
 /******************/
 
-char *DESCRIPTION = "description";
+extern char *DESCRIPTION;
 
 /******************/
 /*     Parent     */
 /******************/
 
-char *PARENT = "parent";
+extern char *PARENT;
 
 /******************/
 /*    Context     */
 /******************/
 
-char *CONTEXT = "context";
+extern char *CONTEXT;
 
 /******************/
 /*   Next Step    */
 /******************/
 
-char *NEXT_STEP = "next_step";
-char *BEHAVIOR = "behavior";
-char *SELECTOR = "selector";
+extern char *NEXT_STEP;
+extern char *BEHAVIOR;
+extern char *SELECTOR;
 
 /******************/
 /*    Actions     */
 /******************/
 
-char *ACTIONS = "actions";
-char *ACTION_TYPE = "action_type";
-char *PARAMETERS = "parameters";
-char *RESULT_VARIABLE = "result_variable";
-char *CREDENTIALS = "credentials";
+extern char *ACTIONS;
+extern char *ACTION_TYPE;
+extern char *PARAMETERS;
+extern char *RESULT_VARIABLE;
+extern char *CREDENTIALS;
 
 /******************/
 /*   Event Name   */
 /******************/
 
-char *EVENT_NAME = "event_name";
+extern char *EVENT_NAME;
 
 /******************/
 /*    Variable    */
 /******************/
 
-char *VARIABLE = "variable";
+extern char *VARIABLE;
 
 /******************/
 /*   Digress In   */
 /******************/
 
-char *DIGRESS_IN = "digress_in";
+extern char *DIGRESS_IN;
 
 /******************/
 /*  Digress Out   */
 /******************/
 
-char *DIGRESS_OUT = "digress_out";
+extern char *DIGRESS_OUT;
 
 /******************/
 /* Dgrs Out Slots */
 /******************/
 
-char *DIGRESS_OUT_SLOTS = "digress_out_slots";
+extern char *DIGRESS_OUT_SLOTS;
 
 /******************/
 /*   User Label   */
 /******************/
 
-char *USER_LABEL = "user_label";
+extern char *USER_LABEL;
+
+/**************************************************************************/
+/*                             Parsing Types                              */
+/**************************************************************************/
+
+extern char *WORKSPACES;
+extern char *WORKSPACE_OBJ;
+extern char *WORKSPACE_ATTR;
+extern char *INTENT_NAME;
+extern char *USER_EXAMPLES;
+extern char *EXAMPLE_ATTR;
+extern char *MENTIONS_ATTR;
+extern char *ENTITY_ATTR;
+extern char *ENTITY_NAME;
+extern char *ENTITY_VALS;
+extern char *ENTITY_VAL_ATTR;
+extern char *ENTITY_VAL_NAME;
+extern char *ENTITY_VAL_TYPE;
+extern char *NODE_LIST;
+extern char *NODE_ATTR;
+extern char *OUTPUT_VALS;
+extern char *TEXT_VAL_ATTR;
+extern char *STRING_LIST;
+extern char *PAUSE_ATTR;
+extern char *IMAGE_ATTR;
+extern char *OPTION_ATTR;
+extern char *OPTIONS_OBJS;
+extern char *OPTIONS_OBJ_ATTR;
+extern char *METADATA_ATTR;
+extern char *CONTEXT_OBJ_ATTR;
+extern char *NEXT_STEP_ATTR;
+extern char *ACTIONS_ATTR;
+extern char *PARAMETERS_ATTR;
+
+#endif

@@ -9,6 +9,8 @@
 /**************************************************************************/
 
 char *BAD_TYPE = "BAD_TYPE";
+char *BAD_NUMBER = "BAD_NUMBER";
+char *BAD_BOOL = "BAD_BOOL";
 
 /**************************************************************************/
 /*                                Literals                                */
@@ -232,3 +234,36 @@ char *DIGRESS_OUT_SLOTS = "digress_out_slots";
 /******************/
 
 char *USER_LABEL = "user_label";
+
+/**************************************************************************/
+/*                             Parsing Types                              */
+/**************************************************************************/
+
+char *WORKSPACES = "WORKSPACES";
+char *WORKSPACE_OBJ = "WORKSPACE_OBJ";
+char *WORKSPACE_ATTR = "WORKSPACE_ATTR";
+char *INTENT_NAME = "INTENT_NAME";
+char *USER_EXAMPLES = "USER_EXAMPLES";
+char *EXAMPLE_ATTR = "EXAMPLE_ATTR";
+char *MENTIONS_ATTR = "MENTIONS_ATTR";
+char *ENTITY_ATTR = "ENTITY_ATTR";
+char *ENTITY_NAME = "ENTITY_NAME";
+char *ENTITY_VALS = "ENTITY_VALS";
+char *ENTITY_VAL_ATTR = "ENTITY_VAL_ATTR";
+char *ENTITY_VAL_NAME = "ENTITY_VAL_NAME";
+char *ENTITY_VAL_TYPE = "ENTITY_VAL_TYPE";
+char *NODE_LIST = "NODE_LIST";
+char *NODE_ATTR = "NODE_ATTR";
+char *OUTPUT_VALS = "OUTPUT_VALS";
+char *TEXT_VAL_ATTR = "TEXT_VAL_ATTR";
+char *STRING_LIST = "STRING_LIST";
+char *PAUSE_ATTR = "PAUSE_ATTR";
+char *IMAGE_ATTR = "IMAGE_ATTR";
+char *OPTION_ATTR = "OPTION_ATTR";
+char *OPTIONS_OBJS = "OPTIONS_OBJS";
+char *OPTIONS_OBJ_ATTR = "OPTIONS_OBJ_ATTR";
+char *METADATA_ATTR = "METADATA_ATTR";
+char *CONTEXT_OBJ_ATTR = "CONTEXT_OBJ_ATTR";
+char *NEXT_STEP_ATTR = "NEXT_STEP_ATTR";
+char *ACTIONS_ATTR = "ACTIONS_ATTR";
+char *PARAMETERS_ATTR = "PARAMETERS_ATTR";

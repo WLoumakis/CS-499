@@ -4,17 +4,19 @@ var lineReader = require('readline').createInterface({
 
 var workspace_id = '31e66674-a3cf-4233-be75-15a2c457b105';
 
+/*
 var watson = require('watson-developer-cloud');
 var assistant = watson.AssistantV1({
 	iam_apikey: 'K4V31w-LlqPmAalrBF63xQ9Ty0yF7o330TxkpxeesRqB',
 	version: '2019-01-12',
 	url: 'https://gateway.watsonplatform.net/assistant/api'
 });
+*/
 
 const bintree = require('bintree');
 
 var tree = new bintree.NodeTree();
-
+/*
 function buildConditions(pos) {
 	if (pos == 0)
 		return '#yes';
@@ -54,33 +56,17 @@ function buildParams(node) {
 	};
 	return params;
 }
-
-function buildNode(line) {
-	var node = new bintree.TreeNode(line, {});
-	var pos = node.getPosition();
-	var conditions = '';
-	var parent = node.getParent();
-	var parentParams;
-	if (parent != null)
-		parentParams = parent.getWatsonParams();
-	else
-		parentParams = undefined;
-	if (pos == 0)
-		conditions = '#yes';
-	else
-		conditions = '#no';
-	var watsonParams = {
-		"text": node.getVal(),
-		"conditions": conditions
-	};
-}
+*/
 
 function read(callback) {
 	lineReader.on('line', function (line) {
-		var newNode = buildNode(line);
-		tree.insert(newNode);
-		var params = buildParams(node);
-		newNode.setWatsonParams(params); //left off here
+		var newNode = bintree.TreeNode(line, {});
+		newNode = tree.insert(newNode);
+		//var params = buildParams(newNode);
+		//newNode.setWatsonParams(params); //left off here
+		//var parent = newNode.getParent();
+		//if (parent)
+		//	parent.setWatsonParams(buildParentParams(parent, newNode));
 	});
 	lineReader.on('close', callback);
 }
@@ -91,6 +77,6 @@ function display(callback) {
 
 read(function() {
 	display(function () {
-		tree.displayPreorder();
+		tree.displayInorder();
 	});
 });
