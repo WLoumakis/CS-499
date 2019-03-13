@@ -155,6 +155,14 @@ static void title();
 static int titlePending();
 
 /******************/
+/*    Children    */
+/******************/
+
+static void children();
+
+static int childrenPending();
+
+/******************/
 /*     Output     */
 /******************/
 
@@ -1056,6 +1064,8 @@ static void nodeAttribute() {
 		type();
 	else if (titlePending())
 		title();
+	else if (childrenPending())
+		children();
 	else if (outputPending())
 		output();
 	else if (metadataPending())
@@ -1090,7 +1100,6 @@ static void nodeAttribute() {
 		user_label();
 }
 
-
 static int treePending() {
 	return check(TREE);
 }
@@ -1121,6 +1130,20 @@ static void title() {
 
 static int titlePending() {
 	return check(TITLE);
+}
+
+/******************/
+/*    Children    */
+/******************/
+
+static void children() {
+	match(CHILDREN);
+	match(COLON);
+	nodeList();
+}
+
+static int childrenPending() {
+	return check(CHILDREN);
 }
 
 /******************/

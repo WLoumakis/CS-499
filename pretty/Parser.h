@@ -23,7 +23,6 @@ extern void initParser(char *filename);
  */
 extern void closeParser();
 
-
 /**
  * Frees all the Lexemes in the given parse tree.
  * 

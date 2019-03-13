@@ -162,6 +162,9 @@ static Lexeme *matchedKeyword(char *str) {
 		// Title
 	else if (strcmp(str, TITLE) == 0) { free(str); return newLexeme(TITLE, UNDEFINED, UNDEFINED, UNDEFINED, line); }
 
+		// Children
+	else if (strcmp(str, CHILDREN) == 0) { free(str); return newLexeme(CHILDREN, UNDEFINED, UNDEFINED, UNDEFINED, line); }
+
 		// Output
 	else if (strcmp(str, OUTPUT) == 0) { free(str); return newLexeme(OUTPUT, UNDEFINED, UNDEFINED, UNDEFINED, line); }
 

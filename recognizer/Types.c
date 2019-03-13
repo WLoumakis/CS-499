@@ -93,6 +93,12 @@ char *TYPE = "type";
 char *TITLE = "title";
 
 /******************/
+/*    Children    */
+/******************/
+
+char *CHILDREN = "children";
+
+/******************/
 /*     Output     */
 /******************/
 

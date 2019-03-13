@@ -96,6 +96,12 @@ extern char *TYPE;
 extern char *TITLE;
 
 /******************/
+/*    Children    */
+/******************/
+
+extern char *CHILDREN;
+
+/******************/
 /*     Output     */
 /******************/
 

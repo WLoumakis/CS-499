@@ -60,6 +60,10 @@ static void DieWithError(Lexeme *l) {
 	exit(1);
 }
 
+/**************************************************************************/
+/*                             Display Method                             */
+/**************************************************************************/
+
 void displayLexeme(FILE *fp, Lexeme *l) {
 	if (isBad(getType(l)))
 		DieWithError(l);
@@ -69,6 +73,17 @@ void displayLexeme(FILE *fp, Lexeme *l) {
 	else if (strcmp(getType(l), NUMBER) == 0)
 		fprintf(fp, " %d", getIval(l));
 	fprintf(fp, "\n");
+}
+
+/**************************************************************************/
+/*                             Freeing Method                             */
+/**************************************************************************/
+
+extern void freeLexeme(Lexeme *l) {
+	if (strcmp(getType(l), STRING) == 0) {
+		free(l->sval);
+	}
+	free(l);
 }
 
 /**************************************************************************/

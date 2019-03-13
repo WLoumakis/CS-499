@@ -1,0 +1,13 @@
+workspaces : [
+	workspace_id : "test-workspace",
+	tree : [
+		{
+			dialog_node : "test_node",
+			conditions : "#test",
+			output : {
+				text : "Test node"
+			}
+			forgot_a_comma_above : "oops"
+		}
+	]
+]

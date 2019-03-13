@@ -16,10 +16,7 @@ boolean	:	TRUE
 /*                               Workspaces                               */
 /**************************************************************************/
 
-workspaces	:	workspace
-			|	workspace COMMA workspaces
-
-workspace	:	WORKSPACE COLON OBRACKET workspaceObjs CBRACKET
+workspaces	:	WORKSPACES COLON OBRACKET workspaceObjs CBRACKET
 
 workspaceObjs	:	workspaceObj
 				|	workspaceObj COMMA workspaceObjs
@@ -116,10 +113,7 @@ intentAttribute	:	intentName
 
 intentName	:	INTENT COLON STRING
 
-userExamples	:	userExample
-				|	userExample COMMA userExamples
-
-userExample	:	EXAMPLES COLON OBRACKET examples CBRACKET
+userExamples	:	EXAMPLES COLON OBRACKET examples CBRACKET
 
 examples	:	example
 			|	example COMMA examples
@@ -208,21 +202,19 @@ fuzzy_match	:	FUZZY_MATCH COLON boolean
 //		This is intentional so as to make it easier for a translation from
 //		the grammar to NodeJS code.
 
-// The tree is represented by an array of Objects
 tree	:	TREE COLON OBRACKET nodeList CBRACKET
 
 nodeList	:	node
 			|	node COMMA nodeList
 
-// This is a fancy way of calling a node an Object
 node	:	OBRACE nodeAttributes CBRACE
 
 nodeAttributes	:	nodeAttribute
 				|	nodeAttribute COMMA nodeAttributes
 
-// The idea for this rule is to have the ability to create a node EXACTLY how you want it, despite it not being necessary
 nodeAttribute	:	type					//Can be inferred
 				|	title					//Can be inferred if output is just one non-empty text object
+				|	children				//Can be blank, but required if the node has any children
 				|	output					//Can be blank
 				|	metadata				//Can be blank
 				|	conditions				//Required
@@ -251,6 +243,12 @@ type	:	TYPE COLON STRING
 /******************/
 
 title	:	TITLE COLON STRING
+
+/******************/
+/*    Children    */
+/******************/
+
+children	:	CHILDREN COLON OBRACKET nodeList CBRACKET
 
 /******************/
 /*     Output     */

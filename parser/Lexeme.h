@@ -52,6 +52,17 @@ extern Lexeme *newLexeme(char *type, int ival, double rval, char *sval, int line
 extern void displayLexeme(FILE *fp, Lexeme *l);
 
 /**************************************************************************/
+/*                             Freeing Method                             */
+/**************************************************************************/
+
+/**
+ * Frees the Lexeme passed in.
+ * 
+ * @param {Lexeme *l} The Lexeme to free.
+ */
+extern void freeLexeme(Lexeme *l);
+
+/**************************************************************************/
 /*                            Accessor Methods                            */
 /**************************************************************************/
 

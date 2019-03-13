@@ -40,7 +40,7 @@ extern char *CBRACE;
 /*                               Workspaces                               */
 /**************************************************************************/
 
-extern char *WORKSPACE;
+extern char *WORKSPACES;
 extern char *NAME;
 extern char *LANGUAGE;
 extern char *COUNTEREXAMPLES;
@@ -96,6 +96,12 @@ extern char *TYPE;
 /******************/
 
 extern char *TITLE;
+
+/******************/
+/*    Children    */
+/******************/
+
+extern char *CHILDREN;
 
 /******************/
 /*     Output     */
@@ -242,9 +248,13 @@ extern char *USER_LABEL;
 /*                             Parsing Types                              */
 /**************************************************************************/
 
-extern char *WORKSPACES;
+extern char *GLUE;
 extern char *WORKSPACE_OBJ;
 extern char *WORKSPACE_ATTR;
+extern char *COUNTEREXAMPLE;
+extern char *DISAMBIGUATION_ATTR;
+extern char *HUMAN_AGENT_ASSIST_ATTR;
+extern char *INTENT_ATTR;
 extern char *INTENT_NAME;
 extern char *USER_EXAMPLES;
 extern char *EXAMPLE_ATTR;
@@ -252,6 +262,7 @@ extern char *MENTIONS_ATTR;
 extern char *ENTITY_ATTR;
 extern char *ENTITY_NAME;
 extern char *ENTITY_VALS;
+extern char *ENTITY_VAL;
 extern char *ENTITY_VAL_ATTR;
 extern char *ENTITY_VAL_NAME;
 extern char *ENTITY_VAL_TYPE;

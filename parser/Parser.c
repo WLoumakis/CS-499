@@ -169,6 +169,16 @@ static Lexeme *title();
 static int titlePending();
 
 /******************/
+/*    Children    */
+/******************/
+
+static Lexeme *children();
+
+/* Pending functions */
+
+static int childrenPending();
+
+/******************/
 /*     Output     */
 /******************/
 
@@ -451,7 +461,8 @@ static Lexeme *user_label();
 
 static Lexeme *advance() {
 	Lexeme *prev = current;
-	current = lex();
+	if (strcmp(getType(current), ENDofINPUT) != 0)
+		current = lex();
 	return prev;
 }
 
@@ -487,7 +498,7 @@ void freeParseTree(Lexeme *tree) {
 		return;
 	freeParseTree(car(tree));
 	freeParseTree(cdr(tree));
-	free(tree);
+	freeLexeme(tree);
 }
 
 Lexeme *parse() {
@@ -1253,6 +1264,8 @@ static Lexeme *nodeAttribute() {
 		return type();
 	else if (titlePending())
 		return title();
+	else if (childrenPending())
+		return children();
 	else if (outputPending())
 		return output();
 	else if (metadataPending())
@@ -1323,6 +1336,22 @@ static Lexeme *title() {
 
 static int titlePending() {
 	return check(TITLE);
+}
+
+/******************/
+/*    Children    */
+/******************/
+
+static Lexeme *children() {
+	free(match(CHILDREN));
+	free(match(COLON));
+	return cons(CHILDREN, nodeList(), null);
+}
+
+/* Pending functions */
+
+static int childrenPending() {
+	return check(CHILDREN);
 }
 
 /******************/

@@ -33,7 +33,6 @@ static Lexeme *boolean();
 /*************************************/
 
 static Lexeme *workspaces();
-static Lexeme *workspace();
 static Lexeme *workspaceObjs();
 static Lexeme *workspaceObj();
 static Lexeme *workspaceAttributes();
@@ -85,7 +84,6 @@ static Lexeme *intentAttributes();
 static Lexeme *intentAttribute();
 static Lexeme *intentName();
 static Lexeme *userExamples();
-static Lexeme *userExample();
 static Lexeme *examples();
 static Lexeme *example();
 static Lexeme *exampleAttributes();
@@ -167,6 +165,16 @@ static Lexeme *title();
 /* Pending functions */
 
 static int titlePending();
+
+/******************/
+/*    Children    */
+/******************/
+
+static Lexeme *children();
+
+/* Pending functions */
+
+static int childrenPending();
 
 /******************/
 /*     Output     */
@@ -446,12 +454,13 @@ static int digress_out_slotsPending();
 static Lexeme *user_label();
 
 /**************************************************************************/
-/*                       Private Parser  Functions                        */
+/*                       Private Parser Functions                         */
 /**************************************************************************/
 
 static Lexeme *advance() {
 	Lexeme *prev = current;
-	current = lex();
+	if (strcmp(getType(current), ENDofINPUT) != 0)
+		current = lex();
 	return prev;
 }
 
@@ -487,7 +496,7 @@ void freeParseTree(Lexeme *tree) {
 		return;
 	freeParseTree(car(tree));
 	freeParseTree(cdr(tree));
-	free(tree);
+	freeLexeme(tree);
 }
 
 Lexeme *parse() {
@@ -519,25 +528,13 @@ static Lexeme *boolean() {
 /*************************************/
 
 static Lexeme *workspaces() {
-	Lexeme *a, *b;
-	a = workspace();
-	if (check(COMMA)) {
-		free(advance());
-		b = workspaces();
-	}
-	else
-		b = null;
-	return cons(WORKSPACES, a, b);
-}
-
-static Lexeme *workspace() {
 	Lexeme *a;
-	free(match(WORKSPACE));
+	free(match(WORKSPACES));
 	free(match(COLON));
 	free(match(OBRACKET));
 	a = workspaceObjs();
 	free(match(CBRACKET));
-	return a;
+	return cons(WORKSPACES, a, null);
 }
 
 static Lexeme *workspaceObjs() {
@@ -614,7 +611,7 @@ static Lexeme *counterExamples() {
 	free(match(OBRACKET));
 	a = counterExamplesList();
 	free (match(CBRACKET));
-	return a;
+	return cons(COUNTEREXAMPLES, a, null);
 }
 
 static Lexeme *counterExamplesList() {
@@ -626,7 +623,7 @@ static Lexeme *counterExamplesList() {
 	}
 	else
 		b = null;
-	return cons(COUNTEREXAMPLES, a, b);
+	return cons(COUNTEREXAMPLE, a, b);
 }
 
 static Lexeme *counterExample() {
@@ -693,7 +690,7 @@ static Lexeme *toolingObj() {
 static Lexeme *storeGenericResponses() {
 	free(match(STORE_GENERIC_RESPONSES));
 	free(match(COLON));
-	return boolean();
+	return cons(STORE_GENERIC_RESPONSES, boolean(), null);
 }
 
 static Lexeme *disambiguation() {
@@ -703,7 +700,7 @@ static Lexeme *disambiguation() {
 	free(match(OBRACE));
 	a = disambiguationAttributes();
 	free(match(CBRACE));
-	return a;
+	return cons(DISAMBIGUATION, a, null);
 }
 
 static Lexeme *disambiguationAttributes() {
@@ -715,7 +712,7 @@ static Lexeme *disambiguationAttributes() {
 	}
 	else
 		b = null;
-	return cons(DISAMBIGUATION, a, b);
+	return cons(DISAMBIGUATION_ATTR, a, b);
 }
 
 static Lexeme *disambiguationAttribute() {
@@ -758,7 +755,7 @@ static Lexeme *human_agent_assist() {
 	free(match(OBRACE));
 	a = humanAgentAssistAttributes();
 	free(match(CBRACE));
-	return a;
+	return cons(HUMAN_AGENT_ASSIST, a, null);
 }
 
 static Lexeme *humanAgentAssistAttributes() {
@@ -770,7 +767,7 @@ static Lexeme *humanAgentAssistAttributes() {
 	}
 	else
 		b = null;
-	return cons(HUMAN_AGENT_ASSIST, a, b);
+	return cons(HUMAN_AGENT_ASSIST_ATTR, a, b);
 }
 
 //TODO: Figure out a more comprehensive list of humanAgentAssist attributes.
@@ -827,7 +824,7 @@ static Lexeme *intentsBlock() {
 	free(match(OBRACKET));
 	a = intents();
 	free(match(CBRACKET));
-	return a;
+	return cons(INTENTS, a, null);
 }
 
 static Lexeme *intents() {
@@ -839,7 +836,7 @@ static Lexeme *intents() {
 	}
 	else
 		b = null;
-	return cons(INTENTS, a, b);
+	return cons(INTENT, a, b);
 }
 
 static Lexeme *intent() {
@@ -859,7 +856,7 @@ static Lexeme *intentAttributes() {
 	}
 	else
 		b = null;
-	return cons(INTENT, a, b);
+	return cons(INTENT_ATTR, a, b);
 }
 
 static Lexeme *intentAttribute() {
@@ -878,25 +875,13 @@ static Lexeme *intentName() {
 }
 
 static Lexeme *userExamples() {
-	Lexeme *a, *b;
-	a = userExample();
-	if (check(COMMA)) {
-		free(advance());
-		b = userExamples();
-	}
-	else
-		b = null;
-	return cons(USER_EXAMPLES, a, b);
-}
-
-static Lexeme *userExample() {
 	Lexeme *a;
 	free(match(EXAMPLES));
 	free(match(COLON));
 	free(match(OBRACKET));
 	a = examples();
 	free(match(CBRACKET));
-	return a;
+	return cons(USER_EXAMPLES, a, null);
 }
 
 static Lexeme *examples() {
@@ -945,7 +930,7 @@ static Lexeme *mentions() {
 	free(match(OBRACKET));
 	a = mentionObjs();
 	free(match(CBRACKET));
-	return a;
+	return cons(MENTIONS, a, null);
 }
 
 static Lexeme *mentionObjs() {
@@ -993,7 +978,7 @@ static Lexeme *entitiesBlock() {
 	free(match(OBRACKET));
 	a = entities();
 	free(match(CBRACKET));
-	return a;
+	return cons(ENTITIES, a, null);
 }
 
 static Lexeme *entities() {
@@ -1005,7 +990,7 @@ static Lexeme *entities() {
 	}
 	else
 		b = null;
-	return cons(ENTITIES, a, b);
+	return cons(ENTITY, a, b);
 }
 
 static Lexeme *entity() {
@@ -1054,7 +1039,7 @@ static Lexeme *entityValues() {
 	free(match(OBRACKET));
 	a = entityValuesList();
 	free(match(CBRACKET));
-	return a;
+	return cons(ENTITY_VALS, a, null);
 }
 
 static Lexeme *entityValuesList() {
@@ -1066,7 +1051,7 @@ static Lexeme *entityValuesList() {
 	}
 	else
 		b = null;
-	return cons(ENTITY_VALS, a, b);
+	return cons(ENTITY_VAL, a, b);
 }
 
 static Lexeme *entityValue() {
@@ -1253,6 +1238,8 @@ static Lexeme *nodeAttribute() {
 		return type();
 	else if (titlePending())
 		return title();
+	else if (childrenPending())
+		return children();
 	else if (outputPending())
 		return output();
 	else if (metadataPending())
@@ -1323,6 +1310,26 @@ static Lexeme *title() {
 
 static int titlePending() {
 	return check(TITLE);
+}
+
+/******************/
+/*    Children    */
+/******************/
+
+static Lexeme *children() {
+	Lexeme *a;
+	free(match(CHILDREN));
+	free(match(COLON));
+	free(match(OBRACKET));
+	a = nodeList();
+	free(match(CBRACKET));
+	return cons(CHILDREN, a, null);
+}
+
+/* Pending functions */
+
+static int childrenPending() {
+	return check(CHILDREN);
 }
 
 /******************/
@@ -1687,7 +1694,7 @@ static Lexeme *label() {
 static Lexeme *value() {
 	free(match(VALUE));
 	free(match(COLON));
-	return inputDataObj();
+	return cons(VALUE, inputDataObj(), null);
 }
 
 static Lexeme *inputDataObj() {

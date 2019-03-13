@@ -37,7 +37,7 @@ char *CBRACE = "CBRACE";
 /*                               Workspaces                               */
 /**************************************************************************/
 
-char *WORKSPACE = "workspace";
+char *WORKSPACES = "workspaces";
 char *NAME = "name";
 char *LANGUAGE = "language";
 char *COUNTEREXAMPLES = "counterexamples";
@@ -93,6 +93,12 @@ char *TYPE = "type";
 /******************/
 
 char *TITLE = "title";
+
+/******************/
+/*    Children    */
+/******************/
+
+char *CHILDREN = "children";
 
 /******************/
 /*     Output     */
@@ -239,9 +245,13 @@ char *USER_LABEL = "user_label";
 /*                             Parsing Types                              */
 /**************************************************************************/
 
-char *WORKSPACES = "WORKSPACES";
+char *GLUE = "GLUE";
 char *WORKSPACE_OBJ = "WORKSPACE_OBJ";
 char *WORKSPACE_ATTR = "WORKSPACE_ATTR";
+char *COUNTEREXAMPLE = "COUNTEREXAMPLE";
+char *DISAMBIGUATION_ATTR = "DISAMBIGUATION_ATTR";
+char *HUMAN_AGENT_ASSIST_ATTR = "HUMAN_AGENT_ASSIST_ATTR";
+char *INTENT_ATTR = "INTENT_ATTR";
 char *INTENT_NAME = "INTENT_NAME";
 char *USER_EXAMPLES = "USER_EXAMPLES";
 char *EXAMPLE_ATTR = "EXAMPLE_ATTR";
@@ -249,6 +259,7 @@ char *MENTIONS_ATTR = "MENTIONS_ATTR";
 char *ENTITY_ATTR = "ENTITY_ATTR";
 char *ENTITY_NAME = "ENTITY_NAME";
 char *ENTITY_VALS = "ENTITY_VALS";
+char *ENTITY_VAL = "ENTITY_VAL";
 char *ENTITY_VAL_ATTR = "ENTITY_VAL_ATTR";
 char *ENTITY_VAL_NAME = "ENTITY_VAL_NAME";
 char *ENTITY_VAL_TYPE = "ENTITY_VAL_TYPE";

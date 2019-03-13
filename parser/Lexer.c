@@ -18,6 +18,7 @@
 
 static void skipWhiteSpace();
 static char readChar();
+static void putBack(char ch);
 
 static Lexeme *lexString();
 static Lexeme *lexNumber();
@@ -52,15 +53,15 @@ Lexeme *lex() {
 		case '{': return newLexeme(OBRACE, UNDEFINED, UNDEFINED, UNDEFINED, line);
 		case '}': return newLexeme(CBRACE, UNDEFINED, UNDEFINED, UNDEFINED, line);
 		case '\"':
-			ungetc(ch, fp);
+			putBack(ch);
 			return lexString();
 		default:
 			if (isdigit(ch)) {
-				ungetc(ch, fp);
+				putBack(ch);
 				return lexNumber();
 			}
 			else {
-				ungetc(ch, fp);
+				putBack(ch);
 				return lexKeyword();
 			}
 	}
@@ -88,7 +89,7 @@ static Lexeme *lexString() {
 	while (!feof(fp) && (ch != '\"' || (ch == '\"' && last == '\\'))) {
 		if (index == length) {
 			length *= 2;
-			buffer = realloc(buffer, sizeof(char) * length + 1);
+			buffer = (char *)realloc(buffer, sizeof(char) * length + 1);
 		}
 		buffer[index++] = ch;
         buffer[index] = 0;
@@ -97,7 +98,7 @@ static Lexeme *lexString() {
 	}
 	if (index == length) {
 		++length;
-        buffer = realloc(buffer, sizeof(char) * length + 1);
+        buffer = (char *)realloc(buffer, sizeof(char) * length + 1);
     }
 	buffer[index++] = '\"';
     buffer[index] = 0;
@@ -117,7 +118,7 @@ static Lexeme *lexNumber() {
 		buffer[index] = 0;
 	}
 	if (ch == '\n') --line;
-	ungetc(ch, fp);
+	putBack(ch);
 	return newLexeme(NUMBER, atoi(buffer), UNDEFINED, UNDEFINED, line);
 }
 
@@ -131,13 +132,13 @@ static Lexeme *lexKeyword() {
 	while (!feof(fp) && (isalpha(ch) || ch == '_')) {
 		if (index == length) {
 			length *=2;
-			buffer = realloc(buffer, sizeof(char) * length + 1);
+			buffer = (char *)realloc(buffer, sizeof(char) * length + 1);
 		}
 		buffer[index++] = ch;
 		ch = readChar();
 	}
 	if (ch == '\n') line--;
-	ungetc(ch, fp);
+	putBack(ch);
 	return matchedKeyword(buffer);
 }
 
@@ -185,6 +186,9 @@ static Lexeme *matchedKeyword(char *str) {
 
 		// Title
 	else if (strcmp(str, TITLE) == 0) { free(str); return newLexeme(TITLE, UNDEFINED, UNDEFINED, UNDEFINED, line); }
+
+		// Children
+	else if (strcmp(str, CHILDREN) == 0) { free(str); return newLexeme (CHILDREN, UNDEFINED, UNDEFINED, UNDEFINED, line); }
 
 		// Output
 	else if (strcmp(str, OUTPUT) == 0) { free(str); return newLexeme(OUTPUT, UNDEFINED, UNDEFINED, UNDEFINED, line); }
@@ -274,10 +278,15 @@ static char readChar() {
 	return ch;
 }
 
+static void putBack(char ch) {
+	if (ch == '\n') --line;
+	ungetc(ch, fp);
+}
+
 static void skipWhiteSpace() {
 	char ch;
 
 	while ((ch = readChar()) != EOF && isspace(ch));
 
-	if (ch != EOF) ungetc(ch, fp);
+	if (ch != EOF) putBack(ch);
 }

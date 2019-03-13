@@ -6,12 +6,15 @@
  */
 
 #include <assert.h>
+#include "Lexeme.h"
 #include "Parser.h"
 
 int main(int argc, char *argv[]) {
 	assert(argc == 2);
 	initParser(argv[1]);
-	parse();
+	Lexeme *tree = parse();
 	closeParser();
+	freeParseTree(tree);
+	printf("legal\n");
 	return 0;
 }
