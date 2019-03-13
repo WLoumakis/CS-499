@@ -119,6 +119,7 @@ char *getSval(Lexeme *l) {
 }
 
 Lexeme *getAval(Lexeme *l, int index) {
+	assert(strcmp(l->type, ARRAY) == 0);
 	assert(index >= 0 && index < l->avalSize);
 	return l->aval[index];
 }
@@ -169,6 +170,7 @@ Lexeme **newArray(Lexeme *l, int size) {
 }
 
 Lexeme *setAval(Lexeme *l, int index, Lexeme *new) {
+	assert(strcmp(l->type, ARRAY) == 0);
 	assert(index >= 0 && index < l->avalSize);
 	Lexeme *ret = l->aval[index];
 	l->aval[index] = new;
