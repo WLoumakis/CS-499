@@ -164,8 +164,6 @@ static void translateProgram(Lexeme *tree) {
 		printTabs();
 		translate(car(tree));
 		tree = cdr(tree);
-		if (tree != null)
-			fprintf(fp, ",");
 		fprintf(fp, "\n");
 	}
 }
