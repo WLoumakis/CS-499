@@ -1,0 +1,293 @@
+----Displaying all environments----
+The local environment is. . .
+var text = "Is the thing you're thinking of a person?"
+------------------------------
+The local environment is. . .
+var dialog_node = "20q"
+var conditions = "#20q"
+------------------------------
+The local environment is. . .
+------------------------------
+The local environment is. . .
+------------------------------
+----Displaying all environments----
+The local environment is. . .
+var text = "Is the person you're thinking about an actor/actress?"
+------------------------------
+The local environment is. . .
+var parent = "20q"
+var dialog_node = "yesPerson"
+var conditions = "$yesPerson"
+------------------------------
+The local environment is. . .
+var output = ENV
+var dialog_node = "20q"
+var conditions = "#20q"
+------------------------------
+The local environment is. . .
+------------------------------
+The local environment is. . .
+------------------------------
+----Displaying all environments----
+The local environment is. . .
+var text = "Is this person male?"
+------------------------------
+The local environment is. . .
+var parent = "yesPerson"
+var dialog_node = "yesActorActress"
+var conditions = "$yesActorActress"
+------------------------------
+The local environment is. . .
+var output = ENV
+var parent = "20q"
+var dialog_node = "yesPerson"
+var conditions = "$yesPerson"
+------------------------------
+The local environment is. . .
+var output = ENV
+var dialog_node = "20q"
+var conditions = "#20q"
+------------------------------
+The local environment is. . .
+------------------------------
+The local environment is. . .
+------------------------------
+----Displaying all environments----
+The local environment is. . .
+var output = ENV
+var parent = "yesPerson"
+var dialog_node = "yesActorActress"
+var conditions = "$yesActorActress"
+------------------------------
+The local environment is. . .
+var output = ENV
+var parent = "20q"
+var dialog_node = "yesPerson"
+var conditions = "$yesPerson"
+------------------------------
+The local environment is. . .
+var output = ENV
+var dialog_node = "20q"
+var conditions = "#20q"
+------------------------------
+The local environment is. . .
+------------------------------
+The local environment is. . .
+------------------------------
+----Displaying all environments----
+The local environment is. . .
+var text = "Is the person you're thinking of an author?"
+------------------------------
+The local environment is. . .
+var previous_sibling = "yesActorActress"
+var parent = "yesPerson"
+var dialog_node = "noActorActress"
+var conditions = "$noActorActress"
+------------------------------
+The local environment is. . .
+var output = ENV
+var parent = "20q"
+var dialog_node = "yesPerson"
+var conditions = "$yesPerson"
+------------------------------
+The local environment is. . .
+var output = ENV
+var dialog_node = "20q"
+var conditions = "#20q"
+------------------------------
+The local environment is. . .
+------------------------------
+The local environment is. . .
+------------------------------
+----Displaying all environments----
+The local environment is. . .
+var output = ENV
+var previous_sibling = "yesActorActress"
+var parent = "yesPerson"
+var dialog_node = "noActorActress"
+var conditions = "$noActorActress"
+------------------------------
+The local environment is. . .
+var output = ENV
+var parent = "20q"
+var dialog_node = "yesPerson"
+var conditions = "$yesPerson"
+------------------------------
+The local environment is. . .
+var output = ENV
+var dialog_node = "20q"
+var conditions = "#20q"
+------------------------------
+The local environment is. . .
+------------------------------
+The local environment is. . .
+------------------------------
+----Displaying all environments----
+The local environment is. . .
+var children = ARRAY
+var output = ENV
+var parent = "20q"
+var dialog_node = "yesPerson"
+var conditions = "$yesPerson"
+------------------------------
+The local environment is. . .
+var output = ENV
+var dialog_node = "20q"
+var conditions = "#20q"
+------------------------------
+The local environment is. . .
+------------------------------
+The local environment is. . .
+------------------------------
+----Displaying all environments----
+The local environment is. . .
+var text = "Is the thing you're thinking of an animal?"
+------------------------------
+The local environment is. . .
+var previous_sibling = "yesPerson"
+var parent = "20q"
+var dialog_node = "noPerson"
+var conditions = "$noPerson"
+------------------------------
+The local environment is. . .
+var output = ENV
+var dialog_node = "20q"
+var conditions = "#20q"
+------------------------------
+The local environment is. . .
+------------------------------
+The local environment is. . .
+------------------------------
+----Displaying all environments----
+The local environment is. . .
+var text = "Is the animal you're thinking of a dog?"
+------------------------------
+The local environment is. . .
+var parent = "noPerson"
+var dialog_node = "yesAnimal"
+var conditions = "$yesAnimal"
+------------------------------
+The local environment is. . .
+var output = ENV
+var previous_sibling = "yesPerson"
+var parent = "20q"
+var dialog_node = "noPerson"
+var conditions = "$noPerson"
+------------------------------
+The local environment is. . .
+var output = ENV
+var dialog_node = "20q"
+var conditions = "#20q"
+------------------------------
+The local environment is. . .
+------------------------------
+The local environment is. . .
+------------------------------
+----Displaying all environments----
+The local environment is. . .
+var output = ENV
+var parent = "noPerson"
+var dialog_node = "yesAnimal"
+var conditions = "$yesAnimal"
+------------------------------
+The local environment is. . .
+var output = ENV
+var previous_sibling = "yesPerson"
+var parent = "20q"
+var dialog_node = "noPerson"
+var conditions = "$noPerson"
+------------------------------
+The local environment is. . .
+var output = ENV
+var dialog_node = "20q"
+var conditions = "#20q"
+------------------------------
+The local environment is. . .
+------------------------------
+The local environment is. . .
+------------------------------
+----Displaying all environments----
+The local environment is. . .
+var text = "Is this thing a location?"
+------------------------------
+The local environment is. . .
+var previous_sibling = "yesAnimal"
+var parent = "noPerson"
+var dialog_node = "noAnimal"
+var conditions = "$noAnimal"
+------------------------------
+The local environment is. . .
+var output = ENV
+var previous_sibling = "yesPerson"
+var parent = "20q"
+var dialog_node = "noPerson"
+var conditions = "$noPerson"
+------------------------------
+The local environment is. . .
+var output = ENV
+var dialog_node = "20q"
+var conditions = "#20q"
+------------------------------
+The local environment is. . .
+------------------------------
+The local environment is. . .
+------------------------------
+----Displaying all environments----
+The local environment is. . .
+var output = ENV
+var previous_sibling = "yesAnimal"
+var parent = "noPerson"
+var dialog_node = "noAnimal"
+var conditions = "$noAnimal"
+------------------------------
+The local environment is. . .
+var output = ENV
+var previous_sibling = "yesPerson"
+var parent = "20q"
+var dialog_node = "noPerson"
+var conditions = "$noPerson"
+------------------------------
+The local environment is. . .
+var output = ENV
+var dialog_node = "20q"
+var conditions = "#20q"
+------------------------------
+The local environment is. . .
+------------------------------
+The local environment is. . .
+------------------------------
+----Displaying all environments----
+The local environment is. . .
+var children = ARRAY
+var output = ENV
+var previous_sibling = "yesPerson"
+var parent = "20q"
+var dialog_node = "noPerson"
+var conditions = "$noPerson"
+------------------------------
+The local environment is. . .
+var output = ENV
+var dialog_node = "20q"
+var conditions = "#20q"
+------------------------------
+The local environment is. . .
+------------------------------
+The local environment is. . .
+------------------------------
+----Displaying all environments----
+The local environment is. . .
+var children = ARRAY
+var output = ENV
+var dialog_node = "20q"
+var conditions = "#20q"
+------------------------------
+The local environment is. . .
+------------------------------
+The local environment is. . .
+------------------------------
+----Displaying all environments----
+The local environment is. . .
+var tree = ARRAY
+------------------------------
+The local environment is. . .
+------------------------------

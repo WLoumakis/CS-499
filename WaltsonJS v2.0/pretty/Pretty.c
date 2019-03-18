@@ -27,8 +27,8 @@ int numTabs;
 /*     Private Method Prototypes     */
 /*************************************/
 
-static int same(char *left, char *right);
 static void printTabs();
+static int same(char *left, char *right);
 
 static void pp(Lexeme *tree);
 static void printProgram(Lexeme *tree);
@@ -37,6 +37,7 @@ static void printAssign(Lexeme *tree);
 static void printObject(Lexeme *tree);
 static void printAttrList(Lexeme *tree);
 static void printArray(Lexeme *tree);
+static void printError(Lexeme *tree);
 
 /*************************************/
 /*            Main Method            */
@@ -84,7 +85,8 @@ static void pp(Lexeme *tree) {
 	else if (same(type, COLON)) printAssign(tree);
 	else if (same(type, OBJECT)) printObject(tree);
 	else if (same(type, ATTRLIST)) printAttrList(tree);
-	else printArray(tree);
+	else if (same(type, MIXINLIST)) printArray(tree);
+	else printError(tree);
 }
 
 static void printProgram(Lexeme *tree) {
@@ -146,4 +148,9 @@ static void printArray(Lexeme *tree) {
 	numTabs--;
 	printTabs();
 	fprintf(fp, "]");
+}
+
+static void printError(Lexeme *tree) {
+	fprintf(stderr, "Error: tried to print something with type %s!\n");
+	exit(1);
 }

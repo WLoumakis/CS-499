@@ -223,5 +223,6 @@ static Lexeme *evalArray(Lexeme *list, Lexeme *env) {
 
 static Lexeme *evalError(Lexeme *tree, Lexeme *env) {
 	fprintf(stderr, "Error: tried to evaluate something with type %s!\n", getType(tree));
+	displayEnvironments(env, stderr);
 	exit(1);
 }
