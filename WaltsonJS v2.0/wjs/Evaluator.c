@@ -13,6 +13,7 @@
 #include "Types.h"
 #include "Lexeme.h"
 #include "Parser.h"
+#include "Evaluator.h"
 #include "Environments.h"
 
 /*************************************/
@@ -36,31 +37,10 @@
 static int same(char *left, char *right);
 
 /*************************************/
-/*            Main Method            */
+/*          Public Methods           */
 /*************************************/
 
-int main(int argc, char *argv[]) {
-	assert(argc == 2);
-	initParser(argv[1]);
-	Lexeme *tree = parse();
-	closeParser();
-
-	Lexeme *global = create();
-
-	eval(tree, global);
-	freeParseTree(tree);
-	return 0;
-}
-
-/*************************************/
-/*          Private Methods          */
-/*************************************/
-
-static int same(char *left, char *right) {
-	return !strcmp(left, right);
-}
-
-static Lexeme *eval(Lexeme *tree, Lexeme *env) {
+Lexeme *eval(Lexeme *tree, Lexeme *env) {
 	if (tree == null)
 		return null;
 	char *type = getType(tree);
@@ -79,7 +59,7 @@ static Lexeme *eval(Lexeme *tree, Lexeme *env) {
 	else return evalError(tree, env);
 }
 
-static Lexeme *evalProgram(Lexeme *tree, Lexeme *env) {
+Lexeme *evalProgram(Lexeme *tree, Lexeme *env) {
 	Lexeme *ret = null;
 	while (tree != null) {
 		ret = eval(car(tree), env);
@@ -88,7 +68,7 @@ static Lexeme *evalProgram(Lexeme *tree, Lexeme *env) {
 	return ret;
 }
 
-static Lexeme *evalMinus(Lexeme *tree, Lexeme *env) {
+Lexeme *evalMinus(Lexeme *tree, Lexeme *env) {
 	Lexeme *num = eval(cdr(tree), env);
 	if (getType(num) == INTEGER)
 		return newLexeme(INTEGER, -1 * getIval(num), UNDEFINED, UNDEFINED, getLine(tree));
@@ -96,20 +76,20 @@ static Lexeme *evalMinus(Lexeme *tree, Lexeme *env) {
 		return newLexeme(REAL, UNDEFINED, -1 * getRval(num), UNDEFINED, getLine(tree));
 }
 
-static Lexeme *evalAssign(Lexeme *tree, Lexeme *env) {
+Lexeme *evalAssign(Lexeme *tree, Lexeme *env) {
 	Lexeme *id = car(tree);
 	Lexeme *result = eval(cdr(tree), env);
 	return insert(env, id, result);
 }
 
-static Lexeme *evalObject(Lexeme *tree, Lexeme *env) {
+Lexeme *evalObject(Lexeme *tree, Lexeme *env) {
 	Lexeme *xenv = extend(env, null, null);
 	eval(car(tree), xenv);
 	displayEnvironments(xenv, stdout);
 	return xenv;
 }
 
-static Lexeme *evalAttrList(Lexeme *list, Lexeme *env) {
+Lexeme *evalAttrList(Lexeme *list, Lexeme *env) {
 	Lexeme *ret = null;
 	while (list != null) {
 		ret = eval(car(list), env);
@@ -118,7 +98,7 @@ static Lexeme *evalAttrList(Lexeme *list, Lexeme *env) {
 	return ret;
 }
 
-static Lexeme *evalArray(Lexeme *list, Lexeme *env) {
+Lexeme *evalArray(Lexeme *list, Lexeme *env) {
 	Lexeme *temp = list;
 	int count = 0;
 	while (temp != null) {
@@ -135,8 +115,16 @@ static Lexeme *evalArray(Lexeme *list, Lexeme *env) {
 	return new;
 }
 
-static Lexeme *evalError(Lexeme *tree, Lexeme *env) {
+Lexeme *evalError(Lexeme *tree, Lexeme *env) {
 	fprintf(stderr, "Error: tried to evaluate something with type %s!\n", getType(tree));
 	displayEnvironments(env, stderr);
 	exit(1);
+}
+
+/*************************************/
+/*          Private Methods          */
+/*************************************/
+
+static int same(char *left, char *right) {
+	return !strcmp(left, right);
 }

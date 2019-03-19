@@ -11,10 +11,8 @@
 #include "Lexeme.h"
 
 /**
- * Creates a new environment.
+ * Creates a new, empty environment.
  * 
- * @param {Lexeme *vars} List of variables to insert into the new environment.
- * @param {Lexeme *vals} List of values corresponding to the vars list.
  * @returns {Lexeme *} The environment created.
  */
 extern Lexeme *create();

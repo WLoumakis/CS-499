@@ -11,10 +11,6 @@
 
 #include "Lexeme.h"
 
-extern void initEvaluator(char *filename);
-
-extern void closeEvaluator();
-
 /**
  * The primary dispatching function for evaluation of a WaltsonJS program.
  * Literals (STRINGs, REALs, etc.) return the tree.

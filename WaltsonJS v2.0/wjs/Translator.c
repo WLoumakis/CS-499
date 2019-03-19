@@ -14,6 +14,7 @@
 #include "Types.h"
 #include "Lexeme.h"
 #include "Parser.h"
+#include "Translator.h"
 
 /*************************************/
 /*              Globals              */
@@ -45,9 +46,10 @@ static int same(char *left, char *right);
 /*          Public Methods           */
 /*************************************/
 
-void initTranslator(char *filename) {
+FILE *initTranslator(char *filename) {
 	fp = fopen(filename, "w");
 	assert(fp != null);
+	return fp;
 }
 
 void closeTranslator() {

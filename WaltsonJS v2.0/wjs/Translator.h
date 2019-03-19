@@ -10,14 +10,16 @@
 #ifndef __MY_TRANSLATOR__
 #define __MY_TRANSLATOR__
 
+#include <stdio.h>
 #include "Lexeme.h"
 
 /**
  * Initializes the Translator by opening the file for writing.
  * 
  * @param {char *filename} The path of the file to write to.
+ * @returns {FILE *} The opened file.
  */
-extern void initTranslator(char *filename);
+extern FILE *initTranslator(char *filename);
 
 /**
  * Closes the file opened during initialization.
