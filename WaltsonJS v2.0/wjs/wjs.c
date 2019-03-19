@@ -31,6 +31,7 @@
 static int same(char *left, char *right);
 
 static Lexeme *execute(Lexeme *env);
+static Lexeme *execChildren(char *parent, Lexeme *children);
 
 /*************************************/
 /*            Main Method            */
@@ -52,9 +53,9 @@ int main(int argc, char *argv[]) {
 	struct tm * time_info = localtime(&cur_time);
 
 	char time_str[33] = {0};
-	strftime(time_str, sizeof(time_str), "%Y.%m.%d.%H.%M.tmp", time_info);
+	strftime(time_str, sizeof(time_str), "%Y.%m.%d.%H.%M.wjs.tmp", time_info);
 
-	FILE *fp = initTranslator("temp.js");
+	FILE *fp = initTranslator(time_str);
 	Lexeme *global = create();
 
 	eval(tree, global);
@@ -73,12 +74,23 @@ static int same(char *left, char *right) {
 	return !strcmp(left, right);
 }
 
+//TODO: The recursive descent for children is a bit tricky.
+//		Essentially, I need to include all of the attributes of a given tree
+//		node EXCEPT for the children attribute. Once all nodes at a level are
+//		translated to NodeJS, I need to execute that script, then rewrite the
+//		boilerplate code and add all of the next children. Howto?
 static Lexeme *execute(Lexeme *env) {
 	Lexeme *table = car(env);
 	Lexeme *vars = car(table);
 	Lexeme *vals = cdr(table);
+	Lexeme *dialog_node;
 	while (vars != null) {
 		char *id = getSval(car(vars));
-		//if (same(id, "children"))
+		if (same(id, "dialog_node")) dialog_node = car(vals);
+		else if (same(id, "children")) return execChildren(dialog_node, car(vals));
 	}
+}
+
+static Lexeme *execChildren(Lexeme *parent, Lexeme *children) {
+
 }
