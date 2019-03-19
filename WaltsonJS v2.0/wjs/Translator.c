@@ -66,12 +66,13 @@ void translate(Lexeme *tree) {
 	else if (same(type, INTEGER)) fprintf(fp, "%d", getIval(tree));
 	else if (same(type, REAL)) fprintf(fp, "%lf", getRval(tree));
 	else if (same(type, ID)) fprintf(fp, "%s", getSval(tree));
+	else if (same(type, ARRAY)) translateArray(tree);
 	else if (same(type, PROGRAM)) translateProgram(tree);
 	else if (same(type, MINUS)) translateMinus(tree);
 	else if (same(type, COLON)) translateAssign(tree);
 	else if (same(type, OBJECT)) translateObject(tree);
 	else if (same(type, ATTRLIST)) translateAttrList(tree);
-	else if (same(type, MIXINLIST)) translateArray(tree);
+	else if (same(type, MIXINLIST)) translateMixinList(tree);
 	else translateError(tree);
 }
 
@@ -122,7 +123,7 @@ void translateAttrList(Lexeme *tree) {
 	inObject = 0;
 }
 
-void translateArray(Lexeme *tree) {
+void translateMixinList(Lexeme *tree) {
 	fprintf(fp, "[\n");
 	numTabs++;
 	while (tree != null) {
@@ -132,6 +133,18 @@ void translateArray(Lexeme *tree) {
 		if (tree != null)
 			fprintf(fp, ",");
 		fprintf(fp, "\n");
+	}
+	numTabs--;
+	printTabs();
+	fprintf(fp, "]");
+}
+
+void translateArray(Lexeme *l) {
+	fprintf(fp, "[\n");
+	numTabs++;
+	for (int i = 0; i < getAvalSize(l); i++) {
+		printTabs();
+		translate(getAval(l, i));
 	}
 	numTabs--;
 	printTabs();

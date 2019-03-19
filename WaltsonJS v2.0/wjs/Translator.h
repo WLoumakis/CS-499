@@ -82,7 +82,14 @@ extern void translateAttrList(Lexeme *list);
  * 
  * @param {Lexeme *list} The MIXINLIST parse tree.
  */
-extern void translateArray(Lexeme *list);
+extern void translateMixinList(Lexeme *list);
+
+/**
+ * Translates an ARRAY Lexeme.
+ * 
+ * @param {Lexeme *l} The ARRAY Lexeme.
+ */
+extern void translateArray(Lexeme *l);
 
 /**
  * Prints information regarding why this may have been triggered an exits.
