@@ -92,6 +92,13 @@ extern void translateMixinList(Lexeme *list);
 extern void translateArray(Lexeme *l);
 
 /**
+ * Translates an ENV Lexemes as an already evaluated environment.
+ * 
+ * @param {Lexeme *env} The environment to translate.
+ */
+extern void translateEnv(Lexeme *env);
+
+/**
  * Prints information regarding why this may have been triggered an exits.
  * 
  * @param {Lexeme *tree} The parse tree that caused an error.

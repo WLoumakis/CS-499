@@ -67,6 +67,7 @@ void translate(Lexeme *tree) {
 	else if (same(type, REAL)) fprintf(fp, "%lf", getRval(tree));
 	else if (same(type, ID)) fprintf(fp, "%s", getSval(tree));
 	else if (same(type, ARRAY)) translateArray(tree);
+	else if (same(type, ENV)) translateEnv(tree);
 	else if (same(type, PROGRAM)) translateProgram(tree);
 	else if (same(type, MINUS)) translateMinus(tree);
 	else if (same(type, COLON)) translateAssign(tree);
@@ -145,14 +146,44 @@ void translateArray(Lexeme *l) {
 	for (int i = 0; i < getAvalSize(l); i++) {
 		printTabs();
 		translate(getAval(l, i));
+		if (i != getAvalSize(l) - 1) fprintf(fp, ",");
+		fprintf(fp, "\n");
 	}
 	numTabs--;
 	printTabs();
 	fprintf(fp, "]");
 }
 
+void translateEnv(Lexeme *env) {
+	fprintf(fp, "{");
+	Lexeme *table = car(env);
+	Lexeme *vars = car(table);
+	Lexeme *vals = cdr(table);
+	int flag = 0;
+	if (vars != null) {
+		fprintf(fp, "\n");
+		numTabs++;
+		flag = 1;
+	}
+	while (vars != null) {
+		printTabs();
+		fprintf(fp, "%s: ", getSval(car(vars)));
+		translate(car(vals));
+		vars = cdr(vars);
+		vals = cdr(vals);
+		if (vars != null)
+			fprintf(fp, ",");
+		fprintf(fp, "\n");
+	}
+	if (flag) {
+		numTabs--;
+		printTabs();
+	}
+	fprintf(fp, "}");
+}
+
 void translateError(Lexeme *tree) {
-	fprintf(stderr, "Error: tried to print something with type %s!\n", getType(tree));
+	fprintf(stderr, "Error: tried to translate something with type %s!\n", getType(tree));
 	exit(1);
 }
 

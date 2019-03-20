@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
 	addGivens();
 	addEnvVariables(global);
 
-	execute(global);
+	//execute(global);
 
 	closeTranslator();
 	return 0;
