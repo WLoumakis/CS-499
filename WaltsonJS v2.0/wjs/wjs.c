@@ -35,7 +35,13 @@ static int same(char *left, char *right);
 
 static char *createTemp(char *buffer);
 
-static Lexeme *execute(Lexeme *env);
+static Lexeme *execAll(Lexeme *env);
+
+static Lexeme *execIntents(Lexeme *env);
+
+static Lexeme *execEntities(Lexeme *env);
+
+static Lexeme *execTree(Lexeme *env);
 static Lexeme *execChildren(Lexeme *parent, Lexeme *children);
 
 static void addGivens();
@@ -48,6 +54,8 @@ static void addEnvVariables(Lexeme *env);
 /*            Main Method            */
 /*************************************/
 
+//IDEA: Create n different NodeJS files, then make a shell-script that loops
+//		from 1 to n doing ./nodejs $i.js
 int main(int argc, char *argv[]) {
 	if (argc != 2) {
 		fprintf(stderr, "Usage: wjs <infile.wjs>\n");
@@ -69,7 +77,7 @@ int main(int argc, char *argv[]) {
 	addGivens();
 	addEnvVariables(global);
 
-	//execute(global);
+	//execAll(global);
 
 	closeTranslator();
 	return 0;
