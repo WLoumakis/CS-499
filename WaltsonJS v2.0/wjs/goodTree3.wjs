@@ -1,0 +1,16 @@
+workspace_id: "67ed01a4-e702-49b7-8af2-b8746d0477f1",
+iam_apikey: "K4V31w-LlqPmAalrBF63xQ9Ty0yF7o330TxkpxeesRqB",
+version: "2019-01-12",
+url: "https://gateway.watsonplatform.net/assistant/api",
+dialog_nodes: [
+	{
+		dialog_node: "welcome",
+		conditions: "welcome",
+		name: "Welcome"
+	},
+	{
+		dialog_node: "anything_else",
+		conditions: "anything_else",
+		name: "Anything else"
+	}
+]

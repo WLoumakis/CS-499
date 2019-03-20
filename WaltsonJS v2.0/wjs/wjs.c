@@ -74,8 +74,8 @@ int main(int argc, char *argv[]) {
 
 	eval(tree, global);
 
-	addGivens();
 	addEnvVariables(global);
+	addGivens();
 
 	//execAll(global);
 
@@ -132,7 +132,7 @@ static void addWatson() {
 }
 
 static void addAssistant() {
-	fprintf(fp, "var assistant = watson.AssistantV1({\n");
+	fprintf(fp, "var assistant = new watson.AssistantV1({\n");
 	fprintf(fp, "\tiam_apikey: iam_apikey,\n");
 	fprintf(fp, "\tversion: version,\n");
 	fprintf(fp, "\turl: url\n");
