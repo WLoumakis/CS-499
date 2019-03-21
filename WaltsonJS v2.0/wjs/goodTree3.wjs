@@ -6,11 +6,11 @@ dialog_nodes: [
 	{
 		dialog_node: "welcome",
 		conditions: "welcome",
-		name: "Welcome"
+		title: "Welcome"
 	},
 	{
 		dialog_node: "anything_else",
 		conditions: "anything_else",
-		name: "Anything else"
+		title: "Anything else"
 	}
 ]

@@ -33,9 +33,18 @@ extern Lexeme *insert(Lexeme *env, Lexeme *var, Lexeme *val);
  * 
  * @param {Lexeme *env} The most local environment to search.
  * @param {Lexeme *var} The variable to search for.
- * @returns {Lexeme * | NULL} The value Lexeme if found; NULL otherwise.
+ * @returns {Lexeme * | @exits} The value Lexeme if found; @exits otherwise.
  */
 extern Lexeme *lookup(Lexeme *env, Lexeme *var);
+
+/**
+ * Tries to find the variable within scope. Returns 1 if found, 0 otherwise.
+ * 
+ * @param {Lexeme *env} The most local environment to search.
+ * @param {Lexeme *var} The variable to search for.
+ * @returns {int} 1 if the variable exists in the environment; 0 otherwise.
+ */
+extern int exists(Lexeme *env, Lexeme *var);
 
 /**
  * Updates a variable's value within the environment.
@@ -43,7 +52,7 @@ extern Lexeme *lookup(Lexeme *env, Lexeme *var);
  * @param {Lexeme *env} The environment to update in.
  * @param {Lexeme *var} The variable whose value needs updating.
  * @param {Lexeme *newVal} The new value for the variable.
- * @returns {Lexeme * | NULL} The old value for var if found; NULL otherwise.
+ * @returns {Lexeme * | @exits} The old value for var if found; @exits otherwise.
  */
 extern Lexeme *update(Lexeme *env, Lexeme *var, Lexeme *newVal);
 

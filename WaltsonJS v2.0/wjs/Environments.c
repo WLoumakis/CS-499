@@ -46,6 +46,22 @@ Lexeme *lookup(Lexeme *env, Lexeme *var) {
 	exit(1);
 }
 
+int exists(Lexeme *env, Lexeme *var) {
+	while (env != null) {
+		Lexeme *table = car(env);
+		Lexeme *vars = car(table);
+		Lexeme *vals = cdr(table);
+		while (vars != null) {
+			if (sameVariable(car(vars), var))
+				return 1;
+			vars = cdr(vars);
+			vals = cdr(vals);
+		}
+		env = cdr(env);
+	}
+	return 0;
+}
+
 Lexeme *update(Lexeme *env, Lexeme *var, Lexeme *newVal) {
 	while (env != null) {
 		Lexeme *table = car(env);

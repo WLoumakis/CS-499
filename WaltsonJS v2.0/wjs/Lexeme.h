@@ -112,6 +112,14 @@ extern Lexeme *getAval(Lexeme *l, int index);
 extern int getAvalSize(Lexeme *l);
 
 /**
+ * Gets the avalCapacity of the passed in Lexeme.
+ * 
+ * @param {Lexeme *l} The Lexeme to get the avalCapacity of.
+ * @returns {int} The avalCapacity of the passed in Lexeme.
+ */
+extern int getAvalCapacity(Lexeme *l);
+
+/**
  * Gets the line number of the passed in Lexeme.
  * 
  * @param {Lexeme *l} The Lexeme to get the line number of.
@@ -179,6 +187,15 @@ extern Lexeme **newArray(Lexeme *l, int size);
 extern Lexeme *setAval(Lexeme *l, int index, Lexeme *new);
 
 /**
+ * Adds an element to the array stored in the Lexeme passed in.
+ * 
+ * @param {Lexeme *l} The Lexeme pointer containing an array.
+ * @param {Lexeme *new} The new Lexeme to add to the array.
+ * @returns {Lexeme *} The inserted Lexeme.
+ */
+extern Lexeme *addAval(Lexeme *l, Lexeme *new);
+
+/**
  * Sets the avalSize of the passed in Lexeme.
  * 
  * @param {Lexeme *l} The Lexeme to set the avalSize of.
@@ -186,6 +203,15 @@ extern Lexeme *setAval(Lexeme *l, int index, Lexeme *new);
  * @returns {int} The old avalSize of the passed in Lexeme.
  */
 extern int setAvalSize(Lexeme *l, int newAvalSize);
+
+/**
+ * Sets the avalCapacity of the passed in Lexeme.
+ * 
+ * @param {Lexeme *l} The Lexeme to set the avalCapacity of.
+ * @param {int newAvalCapacity} The new avalCapacity for the passed in Lexeme.
+ * @returns {int} The old avalCapacity of the passed in Lexeme.
+ */
+extern int setAvalCapacity(Lexeme *l, int newAvalCapacity);
 
 /**
  * Sets the line of the passed in Lexeme.

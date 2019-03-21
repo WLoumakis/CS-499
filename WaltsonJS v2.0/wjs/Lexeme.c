@@ -25,6 +25,7 @@ struct lexeme {
 	char *sval;
 	Lexeme **aval;
 	int avalSize;
+	int avalCapacity;
 	int line;
 	Lexeme *left;
 	Lexeme *right;
@@ -44,6 +45,7 @@ Lexeme *newLexeme(char *type, int ival, double rval, char *sval, int line) {
 	new->line = line;
 	new->aval = null;
 	new->avalSize = 0;
+	new->avalCapacity = 0;
 	new->left = null;
 	new->right = null;
 	return new;
@@ -128,6 +130,10 @@ int getAvalSize(Lexeme *l) {
 	return l->avalSize;
 }
 
+int getAvalCapacity(Lexeme *l) {
+	return l->avalCapacity;
+}
+
 int getLine(Lexeme *l) {
 	return l->line;
 }
@@ -166,6 +172,7 @@ Lexeme **newArray(Lexeme *l, int size) {
 	l->aval = (Lexeme **)malloc(sizeof(Lexeme *) * size);
 	assert(l->aval != null);
 	l->avalSize = size;
+	l->avalCapacity = size;
 	return l->aval;
 }
 
@@ -177,9 +184,25 @@ Lexeme *setAval(Lexeme *l, int index, Lexeme *new) {
 	return ret;
 }
 
+Lexeme *addAval(Lexeme *l, Lexeme *new) {
+	assert(strcmp(l->type, ARRAY) == 0);
+	if (l->avalSize == l->avalCapacity) {
+		l->avalCapacity *= 2;
+		l->aval = realloc(l->aval, l->avalCapacity);
+	}
+	l->aval[l->avalSize++] = new;
+	return new;
+}
+
 int setAvalSize(Lexeme *l, int newAvalSize) {
 	int ret = l->avalSize;
 	l->avalSize = newAvalSize;
+	return ret;
+}
+
+int setAvalCapacity(Lexeme *l, int newAvalCapacity) {
+	int ret = l->avalCapacity;
+	l->avalCapacity = newAvalCapacity;
 	return ret;
 }
 

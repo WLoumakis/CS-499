@@ -2,7 +2,7 @@
 # 
 # Created by Walt Loumakis
 
-OBJS = Lexer.o Lexeme.o Types.o Parser.o Environments.o Translator.o Evaluator.o
+OBJS = Lexer.o Lexeme.o Types.o Parser.o Environments.o Translator.o Evaluator.o sll.o queue.o
 OBJFLS = -Wall -Wextra -std=c99 -g -c
 TARGS = wjs
 TARFL = -Wall -Wextra -std=c99 -g
@@ -41,6 +41,14 @@ Translator.o: Translator.c Translator.h
 # Makes the Evaluator object file
 Evaluator.o: Evaluator.c Evaluator.h
 	gcc $(OBJFLS) Evaluator.c
+
+# Makes the sll object file
+sll.o: sll.c sll.h
+	gcc $(OBJFLS) sll.c
+
+# Makes the queue object file
+queue.o: queue.c queue.h
+	gcc $(OBJFLS) queue.c
 
 # Cleans the object files from the directory
 clean:
