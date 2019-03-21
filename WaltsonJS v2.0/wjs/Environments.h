@@ -42,9 +42,27 @@ extern Lexeme *lookup(Lexeme *env, Lexeme *var);
  * 
  * @param {Lexeme *env} The most local environment to search.
  * @param {Lexeme *var} The variable to search for.
- * @returns {int} 1 if the variable exists in the environment; 0 otherwise.
+ * @returns {int} 1 if the variable exists within scope; 0 otherwise.
  */
 extern int exists(Lexeme *env, Lexeme *var);
+
+/**
+ * Looks up the value of a variable within the passed in environment only.
+ * 
+ * @param {Lexeme *env} The environment to search.
+ * @param {Lexeme *var} The variable to search for.
+ * @returns {Lexeme * | @exits} The value Lexeme if found; @exits otherwise.
+ */
+extern Lexeme *lookupLocal(Lexeme *env, Lexeme *var);
+
+/**
+ * Tries to find the variable within the passed in environment only.
+ * 
+ * @param {Lexeme *env} The environment to search.
+ * @param {Lexeme *var} The variable to search for.
+ * @returns {int} 1 if the variable exsists in the environment; 0 otherwise.
+ */
+extern int existsLocal(Lexeme *env, Lexeme *var);
 
 /**
  * Updates a variable's value within the environment.
