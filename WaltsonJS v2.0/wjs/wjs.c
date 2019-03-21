@@ -196,6 +196,8 @@ static void enqueueDialogNodesHelper(QUEUE *q, Lexeme *env) {
 		enqueueDialogNodesHelper(q, curChild);
 		ps = curChild;
 	}
+	if (c != null)
+		delete(env, children);
 	free(parent);
 	free(dialog_node);
 	free(workspace_id);

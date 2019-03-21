@@ -57,6 +57,15 @@ extern int exists(Lexeme *env, Lexeme *var);
 extern Lexeme *update(Lexeme *env, Lexeme *var, Lexeme *newVal);
 
 /**
+ * Deletes a var-val pair from the environment. Use with caution.
+ * 
+ * @param {Lexeme *env} The most local environment to search.
+ * @param {Lexeme *var} The variable to search for.
+ * @returns {Lexeme * | @exits} The value corresponding to var. 
+ */
+extern Lexeme *delete(Lexeme *env, Lexeme *var);
+
+/**
  * Extends an environment with vars and vals.
  * 
  * @param {Lexeme *env} The environment to extend.
