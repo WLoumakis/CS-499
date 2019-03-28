@@ -78,11 +78,10 @@ var dialog_nodes1 = [
 		conditions: "#20q"
 	}
 ];
-var dialog_nodes = [
-	dialog_nodes1,
-	dialog_nodes2,
-	dialog_nodes3
-];
+var dialog_nodes = [];
+dialog_nodes.push(dialog_nodes1);
+dialog_nodes.push(dialog_nodes2);
+dialog_nodes.push(dialog_nodes3);
 /*
 for (var i = 0; i < dialog_nodes.length; i++) {
 	assistant.createDialogNode(dialog_nodes[i], async function (err, response) {
@@ -140,6 +139,7 @@ for (var i = 0; i < dialog_nodes.length; i++) {
 	insertNode(i);
 }
 */
+/*
 for (var i = 0; i < dialog_nodes.length; i++) {
 	for (var j = 0; j < dialog_nodes[i].length; j++) {
 		assistant.createDialogNode(dialog_nodes[i][j], function (err, response) {
@@ -149,4 +149,25 @@ for (var i = 0; i < dialog_nodes.length; i++) {
 				console.log(JSON.stringify(response, null, 2));
 		});
 	}
+}
+*/
+async function createDialogNodeWithRetry(node, numTries) {
+	try {
+		await assistant.createDialogNode(node, function(err, response) {
+			if (err)
+				throw Error("Error creating node.");
+			else
+				console.log(JSON.stringify(response, null, 2));
+		});
+	} catch(error) {
+		if (numTries >= 5) {
+			console.error(error);
+			return;
+		}
+		await createDialogNodeWithRetry(node, numTries + 1);
+	}
+}
+
+for (var i = 0; i < dialog_nodes.length; i++) {
+	createDialogNodeWithRetry(dialog_nodes[i], 0);
 }

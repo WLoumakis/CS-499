@@ -11,8 +11,8 @@ var assistant = new watson.AssistantV1({
 });
 
 var workspace = {
-	name: 'test-workspace',
-	description: 'Test workspace created through API.'
+	name: 'Workspace 1',
+	description: 'Test workspace created for showing incrementally adding nodes.'
 }
 
 assistant.createWorkspace(workspace, function (err, response) {
