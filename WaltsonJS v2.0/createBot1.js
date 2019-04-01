@@ -687,7 +687,9 @@ async function createNodesLevel(level) {
 	}
 }
 
-createNodesLevel(0);
+createNodesLevel(2);
+createNodesLevel(3);
+createNodesLevel(4);
 
 
 /*

@@ -633,10 +633,12 @@ function createDialogNodes() {
 
 /* Creating the Skill */
 function callback(err, response) {
-	if (err)
+	if (err) {
 		console.error(err);
-	else
+	}
+	else {
 		console.log(JSON.stringify(response, null, 2));
+	}
 }
 
 function createSkill() {
