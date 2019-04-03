@@ -13,7 +13,6 @@ program		:	definition
 			|	definition COMMA program
 
 definition	:	ID COLON unary
-			|	STRING COLON unary
 
 unary		:	TRUE
 			|	FALSE
