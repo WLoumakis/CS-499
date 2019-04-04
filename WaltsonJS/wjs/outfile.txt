@@ -1,0 +1,176 @@
+[ { type: 'ENVIRONMENT',
+    value: undefined,
+    line: undefined,
+    left: 
+     { type: 'TABLE',
+       value: undefined,
+       line: undefined,
+       left: [Object],
+       right: [Object] },
+    right: 
+     { type: 'ENVIRONMENT',
+       value: undefined,
+       line: undefined,
+       left: [Object],
+       right: null } } ]
+len = 2
+len = 2
+len = 0
+returning result = []
+len = 0
+returning result = []
+returning result = [ { type: 'ENVIRONMENT',
+    value: undefined,
+    line: undefined,
+    left: 
+     { type: 'TABLE',
+       value: undefined,
+       line: undefined,
+       left: [Object],
+       right: [Object] },
+    right: 
+     { type: 'ENVIRONMENT',
+       value: undefined,
+       line: undefined,
+       left: [Object],
+       right: [Object] } },
+  { type: 'ENVIRONMENT',
+    value: undefined,
+    line: undefined,
+    left: 
+     { type: 'TABLE',
+       value: undefined,
+       line: undefined,
+       left: [Object],
+       right: [Object] },
+    right: 
+     { type: 'ENVIRONMENT',
+       value: undefined,
+       line: undefined,
+       left: [Object],
+       right: [Object] } } ]
+len = 2
+len = 0
+returning result = []
+len = 0
+returning result = []
+returning result = [ { type: 'ENVIRONMENT',
+    value: undefined,
+    line: undefined,
+    left: 
+     { type: 'TABLE',
+       value: undefined,
+       line: undefined,
+       left: [Object],
+       right: [Object] },
+    right: 
+     { type: 'ENVIRONMENT',
+       value: undefined,
+       line: undefined,
+       left: [Object],
+       right: [Object] } },
+  { type: 'ENVIRONMENT',
+    value: undefined,
+    line: undefined,
+    left: 
+     { type: 'TABLE',
+       value: undefined,
+       line: undefined,
+       left: [Object],
+       right: [Object] },
+    right: 
+     { type: 'ENVIRONMENT',
+       value: undefined,
+       line: undefined,
+       left: [Object],
+       right: [Object] } } ]
+returning result = [ { type: 'ENVIRONMENT',
+    value: undefined,
+    line: undefined,
+    left: 
+     { type: 'TABLE',
+       value: undefined,
+       line: undefined,
+       left: [Object],
+       right: [Object] },
+    right: 
+     { type: 'ENVIRONMENT',
+       value: undefined,
+       line: undefined,
+       left: [Object],
+       right: [Object] } },
+  { type: 'ENVIRONMENT',
+    value: undefined,
+    line: undefined,
+    left: 
+     { type: 'TABLE',
+       value: undefined,
+       line: undefined,
+       left: [Object],
+       right: [Object] },
+    right: 
+     { type: 'ENVIRONMENT',
+       value: undefined,
+       line: undefined,
+       left: [Object],
+       right: [Object] } },
+  { type: 'ENVIRONMENT',
+    value: undefined,
+    line: undefined,
+    left: 
+     { type: 'TABLE',
+       value: undefined,
+       line: undefined,
+       left: [Object],
+       right: [Object] },
+    right: 
+     { type: 'ENVIRONMENT',
+       value: undefined,
+       line: undefined,
+       left: [Object],
+       right: [Object] } },
+  { type: 'ENVIRONMENT',
+    value: undefined,
+    line: undefined,
+    left: 
+     { type: 'TABLE',
+       value: undefined,
+       line: undefined,
+       left: [Object],
+       right: [Object] },
+    right: 
+     { type: 'ENVIRONMENT',
+       value: undefined,
+       line: undefined,
+       left: [Object],
+       right: [Object] } },
+  { type: 'ENVIRONMENT',
+    value: undefined,
+    line: undefined,
+    left: 
+     { type: 'TABLE',
+       value: undefined,
+       line: undefined,
+       left: [Object],
+       right: [Object] },
+    right: 
+     { type: 'ENVIRONMENT',
+       value: undefined,
+       line: undefined,
+       left: [Object],
+       right: [Object] } },
+  { type: 'ENVIRONMENT',
+    value: undefined,
+    line: undefined,
+    left: 
+     { type: 'TABLE',
+       value: undefined,
+       line: undefined,
+       left: [Object],
+       right: [Object] },
+    right: 
+     { type: 'ENVIRONMENT',
+       value: undefined,
+       line: undefined,
+       left: [Object],
+       right: [Object] } } ]

@@ -191,7 +191,6 @@ static Lexeme *evalAssign(Lexeme *tree, Lexeme *env) {
 static Lexeme *evalObject(Lexeme *tree, Lexeme *env) {
 	Lexeme *xenv = extend(env, null, null);
 	eval(car(tree), xenv);
-	displayEnvironments(xenv, stdout);
 	return xenv;
 }
 

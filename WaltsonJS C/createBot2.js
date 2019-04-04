@@ -73,27 +73,13 @@ var intents = [
 	}
 ];
 
-function createIntents() {
-	for (var i = 0; i < intents.length; i++) {
-		intents[i]['workspace_id'] = workspace_id;
-		assistant.createIntent(intents[i], callback);
-	}
-}
-
 /* Entities */
 var entities = [];
-
-function createEntities() {
-	for (var i = 0; i < entities.length; i++) {
-		entities[i]['workspace_id'] = workspace_id;
-		assistant.createEntity(entities[i], callback);
-	}
-}
 
 /* Dialog Nodes */
 var dialog_nodes = [
 	{
-		node_type: 'event_handler',
+		type: 'event_handler',
 		output: {},
 		parent: 'slot_yesPerson',
 		context: {
@@ -105,7 +91,7 @@ var dialog_nodes = [
 		dialog_node: 'handler_10_1550098827650'
 	},
 	{
-		node_type: 'event_handler',
+		type: 'event_handler',
 		output: {},
 		parent: 'slot_yesPerson',
 		metadata: {},
@@ -114,7 +100,7 @@ var dialog_nodes = [
 		previous_sibling: 'handler_10_1550098827650'
 	},
 	{
-		node_type: 'event_handler',
+		type: 'event_handler',
 		parent: 'slot_noPerson',
 		context: {
 			'noPerson': '#no'
@@ -124,7 +110,7 @@ var dialog_nodes = [
 		dialog_node: 'handler_13_1550099007064'
 	},
 	{
-		node_type: 'event_handler',
+		type: 'event_handler',
 		output: {},
 		parent: 'slot_noPerson',
 		event_name: 'focus',
@@ -132,7 +118,7 @@ var dialog_nodes = [
 		previous_sibling: 'handler_13_1550099007064'
 	},
 	{
-		node_type: 'event_handler',
+		type: 'event_handler',
 		output: {},
 		parent: 'slot_18_1550099336394',
 		context: {
@@ -144,7 +130,7 @@ var dialog_nodes = [
 		dialog_node: 'handler_19_1550099336394'
 	},
 	{
-		node_type: 'event_handler',
+		type: 'event_handler',
 		output: {},
 		parent: 'slot_18_1550099336394',
 		event_name: 'focus',
@@ -152,7 +138,7 @@ var dialog_nodes = [
 		previous_sibling: 'handler_19_1550099336394'
 	},
 	{
-		node_type: 'event_handler',
+		type: 'event_handler',
 		output: {},
 		parent: 'slot_21_1550099353344',
 		context: {
@@ -164,7 +150,7 @@ var dialog_nodes = [
 		dialog_node: 'handler_22_1550099353344'
 	},
 	{
-		node_type: 'event_handler',
+		type: 'event_handler',
 		output: {},
 		parent: 'slot_21_1550099353344',
 		event_name: 'focus',
@@ -172,7 +158,7 @@ var dialog_nodes = [
 		previous_sibling: 'handler_22_1550099353344'
 	},
 	{
-		node_type: 'event_handler',
+		type: 'event_handler',
 		output: {},
 		parent: 'slot_25_1550099414959',
 		context: {
@@ -184,7 +170,7 @@ var dialog_nodes = [
 		dialog_node: 'handler_26_1550099414959'
 	},
 	{
-		node_type: 'event_handler',
+		type: 'event_handler',
 		output: {},
 		parent: 'slot_25_1550099414959',
 		event_name: 'focus',
@@ -192,7 +178,7 @@ var dialog_nodes = [
 		previous_sibling: 'handler_26_1550099414959'
 	},
 	{
-		node_type: 'event_handler',
+		type: 'event_handler',
 		output: {},
 		parent: 'slot_28_1550099425340',
 		context: {
@@ -204,7 +190,7 @@ var dialog_nodes = [
 		dialog_node: 'handler_29_1550099425340'
 	},
 	{
-		node_type: 'event_handler',
+		type: 'event_handler',
 		output: {},
 		parent: 'slot_28_1550099425340',
 		event_name: 'focus',
@@ -212,7 +198,7 @@ var dialog_nodes = [
 		previous_sibling: 'handler_29_1550099425340'
 	},
 	{
-		node_type: 'event_handler',
+		type: 'event_handler',
 		parent: 'slot_2_1550180092244',
 		context: {
 			'yesActorActress': '#yes'
@@ -222,7 +208,7 @@ var dialog_nodes = [
 		dialog_node: 'handler_3_1550180092244'
 	},
 	{
-		node_type: 'event_handler',
+		type: 'event_handler',
 		output: {},
 		parent: 'slot_2_1550247971685',
 		context: {
@@ -234,7 +220,7 @@ var dialog_nodes = [
 		dialog_node: 'handler_3_1550247971685'
 	},
 	{
-		node_type: 'event_handler',
+		type: 'event_handler',
 		output: {},
 		parent: 'slot_32_1550099913353',
 		context: {
@@ -246,7 +232,7 @@ var dialog_nodes = [
 		dialog_node: 'handler_33_1550099913353'
 	},
 	{
-		node_type: 'event_handler',
+		type: 'event_handler',
 		output: {},
 		parent: 'slot_32_1550099913353',
 		event_name: 'focus',
@@ -254,7 +240,7 @@ var dialog_nodes = [
 		previous_sibling: 'handler_33_1550099913353'
 	},
 	{
-		node_type: 'event_handler',
+		type: 'event_handler',
 		parent: 'slot_35_1550099925978',
 		context: {
 			'noPerson': '#no'
@@ -264,7 +250,7 @@ var dialog_nodes = [
 		dialog_node: 'handler_36_1550099925979'
 	},
 	{
-		node_type: 'event_handler',
+		type: 'event_handler',
 		output: {},
 		parent: 'slot_35_1550099925978',
 		event_name: 'focus',
@@ -272,7 +258,7 @@ var dialog_nodes = [
 		previous_sibling: 'handler_36_1550099925979'
 	},
 	{
-		node_type: 'event_handler',
+		type: 'event_handler',
 		output: {},
 		parent: 'slot_2_1550180092244',
 		event_name: 'focus',
@@ -280,7 +266,7 @@ var dialog_nodes = [
 		previous_sibling: 'handler_3_1550180092244'
 	},
 	{
-		node_type: 'event_handler',
+		type: 'event_handler',
 		output: {},
 		parent: 'slot_2_1550247971685',
 		event_name: 'focus',
@@ -288,7 +274,7 @@ var dialog_nodes = [
 		previous_sibling: 'handler_3_1550247971685'
 	},
 	{
-		node_type: 'event_handler',
+		type: 'event_handler',
 		parent: 'slot_5_1550180108963',
 		context: {
 			'noActorActress': '#no'
@@ -298,7 +284,7 @@ var dialog_nodes = [
 		dialog_node: 'handler_6_1550180108963'
 	},
 	{
-		node_type: 'event_handler',
+		type: 'event_handler',
 		output: {},
 		parent: 'slot_5_1550247981985',
 		context: {
@@ -310,7 +296,7 @@ var dialog_nodes = [
 		dialog_node: 'handler_6_1550247981985'
 	},
 	{
-		node_type: 'event_handler',
+		type: 'event_handler',
 		output: {},
 		parent: 'slot_5_1550180108963',
 		event_name: 'focus',
@@ -318,7 +304,7 @@ var dialog_nodes = [
 		previous_sibling: 'handler_6_1550180108963'
 	},
 	{
-		node_type: 'event_handler',
+		type: 'event_handler',
 		output: {},
 		parent: 'slot_5_1550247981985',
 		event_name: 'focus',
@@ -326,7 +312,7 @@ var dialog_nodes = [
 		previous_sibling: 'handler_6_1550247981985'
 	},
 	{
-		node_type: 'standard',
+		type: 'standard',
 		title: 'Is the thing youre thinking of a person',
 		output: {
 			text: {
@@ -345,7 +331,7 @@ var dialog_nodes = [
 		digress_out: 'allow_all'
 	},
 	{
-		node_type: 'standard',
+		type: 'standard',
 		title: 'Is this person an actoractress',
 		output: {
 			text: {
@@ -364,7 +350,7 @@ var dialog_nodes = [
 		digress_out: 'allow_all'
 	},
 	{
-		node_type: 'standard',
+		type: 'standard',
 		title: 'Is this thing an animal',
 		output: {
 			text: {
@@ -384,7 +370,7 @@ var dialog_nodes = [
 		previous_sibling: 'Is this person an actoractress'
 	},
 	{
-		node_type: 'standard',
+		type: 'standard',
 		title: 'Is this animal a dog',
 		output: {
 			text: {
@@ -400,7 +386,7 @@ var dialog_nodes = [
 		dialog_node: 'node_10_1550248158702'
 	},
 	{
-		node_type: 'standard',
+		type: 'standard',
 		title: 'Is this thing a location',
 		output: {
 			text: {
@@ -417,7 +403,7 @@ var dialog_nodes = [
 		previous_sibling: 'node_10_1550248158702'
 	},
 	{
-		node_type: 'frame',
+		type: 'frame',
 		title: 'Actor/Actress Intent Getter',
 		output: {
 			text: {
@@ -438,7 +424,7 @@ var dialog_nodes = [
 		digress_out_slots: 'not_allowed'
 	},
 	{
-		node_type: 'frame',
+		type: 'frame',
 		title: 'Animal Intent Getter',
 		output: {
 			text: {
@@ -459,7 +445,7 @@ var dialog_nodes = [
 		digress_out_slots: 'not_allowed'
 	},
 	{
-		node_type: 'standard',
+		type: 'standard',
 		title: 'Is this person a man',
 		output: {
 			text: {
@@ -475,7 +461,7 @@ var dialog_nodes = [
 		dialog_node: 'node_8_1550247996787'
 	},
 	{
-		node_type: 'standard',
+		type: 'standard',
 		title: 'Is this person an author',
 		output: {
 			text: {
@@ -492,7 +478,7 @@ var dialog_nodes = [
 		previous_sibling: 'node_8_1550247996787'
 	},
 	{
-		node_type: 'frame',
+		type: 'frame',
 		title: 'Person Intent Getter',
 		output: {
 			text: {
@@ -513,7 +499,7 @@ var dialog_nodes = [
 		digress_out_slots: 'not_allowed'
 	},
 	{
-		node_type: 'slot',
+		type: 'slot',
 		output: {},
 		parent: 'Is this person an actoractress',
 		metadata: {},
@@ -522,7 +508,7 @@ var dialog_nodes = [
 		previous_sibling: 'node_1_1550180060092'
 	},
 	{
-		node_type: 'slot',
+		type: 'slot',
 		output: {},
 		parent: 'Is this person an actoractress',
 		metadata: {},
@@ -531,7 +517,7 @@ var dialog_nodes = [
 		previous_sibling: 'slot_18_1550099336394'
 	},
 	{
-		node_type: 'slot',
+		type: 'slot',
 		output: {},
 		parent: 'node_1_1550180060092',
 		metadata: {},
@@ -540,7 +526,7 @@ var dialog_nodes = [
 		previous_sibling: 'node_9_1550248083383'
 	},
 	{
-		node_type: 'slot',
+		type: 'slot',
 		output: {},
 		parent: 'node_1_1550247955644',
 		metadata: {},
@@ -549,7 +535,7 @@ var dialog_nodes = [
 		previous_sibling: 'node_11_1550248270002'
 	},
 	{
-		node_type: 'slot',
+		type: 'slot',
 		output: {},
 		parent: 'Is this thing an animal',
 		metadata: {},
@@ -558,7 +544,7 @@ var dialog_nodes = [
 		previous_sibling: 'node_1_1550247955644'
 	},
 	{
-		node_type: 'slot',
+		type: 'slot',
 		output: {},
 		parent: 'Is this thing an animal',
 		metadata: {},
@@ -567,7 +553,7 @@ var dialog_nodes = [
 		previous_sibling: 'slot_25_1550099414959'
 	},
 	{
-		node_type: 'slot',
+		type: 'slot',
 		output: {},
 		parent: 'Person Intent Getter',
 		metadata: {},
@@ -576,7 +562,7 @@ var dialog_nodes = [
 		previous_sibling: 'Is this thing an animal'
 	},
 	{
-		node_type: 'slot',
+		type: 'slot',
 		output: {},
 		parent: 'Person Intent Getter',
 		metadata: {},
@@ -585,7 +571,7 @@ var dialog_nodes = [
 		previous_sibling: 'slot_32_1550099913353'
 	},
 	{
-		node_type: 'slot',
+		type: 'slot',
 		output: {},
 		parent: 'node_1_1550180060092',
 		metadata: {},
@@ -594,7 +580,7 @@ var dialog_nodes = [
 		previous_sibling: 'slot_2_1550180092244'
 	},
 	{
-		node_type: 'slot',
+		type: 'slot',
 		output: {},
 		parent: 'node_1_1550247955644',
 		metadata: {},
@@ -603,7 +589,7 @@ var dialog_nodes = [
 		previous_sibling: 'slot_2_1550247971685'
 	},
 	{
-		node_type: 'slot',
+		type: 'slot',
 		title: 'slot_noPerson',
 		output: {},
 		parent: 'Is the thing youre thinking of a person',
@@ -613,7 +599,7 @@ var dialog_nodes = [
 		previous_sibling: 'slot_yesPerson'
 	},
 	{
-		node_type: 'slot',
+		type: 'slot',
 		title: 'slot_yesPerson',
 		output: {},
 		parent: 'Is the thing youre thinking of a person',
@@ -624,27 +610,18 @@ var dialog_nodes = [
 	}
 ];
 
-function createDialogNodes() {
-	for (var i = 0; i < dialog_nodes.length; i++) {
-		dialog_nodes[i]['workspace_id'] = workspace_id;
-		assistant.createDialogNode(dialog_nodes[i], callback);
-	}
-}
-
-/* Creating the Skill */
 function callback(err, response) {
-	if (err) {
-		console.error(err);
-	}
-	else {
-		console.log(JSON.stringify(response, null, 2));
-	}
+	if (err)
+		console.error(err)
+	else
+		console.log(JSON.stringify(response, null, 2))
 }
 
-function createSkill() {
-	createIntents();
-	createEntities();
-	createDialogNodes();
+let params = {
+	workspace_id: workspace_id,
+	intents: intents,
+	entities: entities,
+	dialog_nodes: dialog_nodes
 }
 
-createSkill();
+assistant.updateWorkspace(params, callback)
