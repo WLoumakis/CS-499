@@ -10,7 +10,13 @@ var Type = {
 	COMMA: 'COMMA',
 	MINUS: 'MINUS',
 	STRING: 'STRING',
+	SKIP: 'SKIP',
+	HASH: 'HASH',
+	AT: 'AT',
+	DOLLAR: 'DOLLAR',
 	NUMBER: 'NUMBER',
+	AND: 'AND',
+	OR: 'OR',
 	ID: 'ID',
 	TRUE: 'true',
 	FALSE: 'false',
@@ -26,7 +32,10 @@ var Type = {
 	ID_LIST: 'ID_LIST',
 	VALUE_LIST: 'VALUE_LIST',
 
-	END_OF_INPUT: 'END_OF_INPUT'
+	END_OF_INPUT: 'END_OF_INPUT',
+
+	EXPLICIT: 'EXPLICIT',
+	IMPLICIT: 'IMPLICIT'
 	
 }
 
@@ -168,14 +177,26 @@ Lexer.prototype = {
 				return new Lexeme(Type.OPEN_BRACKET, undefined, this.line, undefined, undefined)
 			case ']':
 				return new Lexeme(Type.CLOSE_BRACKET, undefined, this.line, undefined, undefined)
-/* FIXME: */case '{':
+			case '{':
 				return new Lexeme(Type.OPEN_BRACE, undefined, this.line, undefined, undefined)
-/* FIXME: */case '}':
+			case '}':
 				return new Lexeme(Type.CLOSE_BRACE, undefined, this.line, undefined, undefined)
 			case ':':
 				return new Lexeme(Type.COLON, undefined, this.line, undefined, undefined)
 			case ',':
 				return new Lexeme(Type.COMMA, undefined, this.line, undefined, undefined)
+			case '*':
+				return new Lexeme(Type.SKIP, undefined, this.line, undefined, undefined)
+			case '&':
+				return new Lexeme(Type.AND, undefined, this.line, undefined, undefined)
+			case '|':
+				return new Lexeme(Type.OR, undefined, this.line, undefined, undefined)
+			case '#':
+				return new Lexeme(Type.HASH, undefined, this.line, undefined, undefined)
+			case '@':
+				return new Lexeme(Type.AT, undefined, this.line, undefined, undefined)
+			case '$':
+				return new Lexeme(Type.DOLLAR, undefined, this.line, undefined, undefined)
 			case '-':
 				return new Lexeme(Type.MINUS, undefined, this.line, undefined, undefined)
 			case '"':
@@ -228,26 +249,37 @@ Parser.prototype = {
 	program: function() {
 		let a, b
 		a = this.definition()
-		if (this.check(Type.COMMA)) {
-			this.advance()
+		if (this.definitionPending())
 			b = this.program()
-		}
 		else
 			b = null
 		return Lexeme.prototype.cons(Type.PROGRAM, a, b)
 	},
 	definition: function() {
-		let a = this.match(Type.ID)
+		if (this.explicitDefPending())
+			return this.explicitDef()
+		else
+			return this.implicitDef()
+	},
+	explicitDef: function() {
+		this.match(Type.ID)
 		this.match(Type.COLON)
-		return Lexeme.prototype.cons(Type.COLON, a, this.unary())
+		return Lexeme.prototype.cons(Type.EXPLICIT, this.unary(), null)
+	},
+	implicitDef: function() {
+		return Lexeme.prototype.cons(Type.IMPLICIT, this.unary(), null)
 	},
 	unary: function() {
-		if (this.check(Type.TRUE) ||
+		if (this.check(Type.ID) ||
+			this.check(Type.TRUE) ||
 			this.check(Type.FALSE) ||
-			this.check(Type.STRING))
+			this.check(Type.STRING) ||
+			this.check(Type.SKIP))
 				return this.advance()
 		else if (this.numberPending())
 			return this.number()
+		else if (this.boolExprPending())
+			return this.boolExpr()
 		else if (this.objectPending())
 			return this.object()
 		else
@@ -262,6 +294,51 @@ Parser.prototype = {
 	negNum: function() {
 		this.match(Type.MINUS)
 		return Lexeme.prototype.cons(Type.MINUS, null, this.match(Type.NUMBER))
+	},
+	boolExpr: function() {
+		let a, b
+		if (this.check(Type.OPEN_PAREN)) {
+			this.advance()
+			a = this.boolExpr()
+			this.match(Type.CLOSE_PAREN)
+			return Lexeme.prototype.cons(Type.OPEN_PAREN, null, a)
+		}
+		a = this.boolUnary()
+		if (this.boolOpPending()) {
+			b = this.boolOp()
+			return Lexeme.prototype.cons(b.getType(), a, this.boolExpr())
+		}
+		return a
+	},
+	boolUnary: function() {
+		if (this.intentPending())
+			return this.intent()
+		else if (this.entityPending())
+			return this.entity()
+		else
+			return this.context()
+	},
+	boolOp: function() {
+		if (this.check(Type.AND)) {
+			this.advance()
+			return this.match(Type.AND)
+		}
+		else {
+			this.advance()
+			return this.match(Type.OR)
+		}
+	},
+	intent: function() {
+		this.match(Type.HASH)
+		return Lexeme.prototype.cons(Type.HASH, null, this.match(Type.ID))
+	},
+	entity: function() {
+		this.match(Type.AT)
+		return Lexeme.prototype.cons(Type.AT, null, this.match(Type.ID))
+	},
+	context: function() {
+		this.match(Type.DOLLAR)
+		return Lexeme.prototype.cons(Type.DOLLAR, null, this.match(Type.ID))
 	},
 	object: function() {
 		let a
@@ -311,7 +388,25 @@ Parser.prototype = {
 			return this.object()
 	},
 	definitionPending: function() {
+		return (this.explicitDefPending() ||
+				this.implicitDefPending())
+	},
+	explicitDefPending: function() {
 		return this.check(Type.ID)
+	},
+	implicitDefPending: function() {
+		return this.unaryPending()
+	},
+	unaryPending: function() {
+		return (this.check(Type.ID) ||
+				this.check(Type.TRUE) || 
+				this.check(Type.FALSE) ||
+				this.check(Type.STRING) ||
+				this.check(Type.SKIP) ||
+				this.numberPending() ||
+				this.boolExprPending() ||
+				this.objectPending() ||
+				this.arrayPending())
 	},
 	numberPending: function() {
 		return (this.nonNegNumPending() ||

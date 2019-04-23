@@ -19,14 +19,14 @@ explicitDef	:	ID COLON unary
 
 implicitDef	:	unary
 
-unary		:	TRUE
+unary		:	ID
+			|	TRUE
 			|	FALSE
 			|	number
 			|	STRING
 			|	SKIP
-			|	URL
 			|	boolExpr
-//TODO: Remove?			|	object
+			|	object
 			|	array
 
 number		:	nonnegNum
@@ -55,9 +55,9 @@ entity		:	AT ID
 
 context		:	DOLLAR ID
 
-//TODO: Remove? object		:	OBRACE optProgram CBRACE
+object		:	OBRACE optProgram CBRACE
 
-//TODO: Remove? optProgram	:	program
+optProgram	:	program
 			|	*EMPTY*
 
 array		:	OBRACKET mixinList CBRACKET
@@ -66,5 +66,4 @@ mixinList	:	mixin
 			|	mixin mixinList
 
 mixin		:	definition
-//TODO: Remove?			|	object
-
+			|	object

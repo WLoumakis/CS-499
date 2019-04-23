@@ -10,7 +10,13 @@ var Type = {
 	COMMA: 'COMMA',
 	MINUS: 'MINUS',
 	STRING: 'STRING',
+	SKIP: 'SKIP',
+	HASH: 'HASH',
+	AT: 'AT',
+	DOLLAR: 'DOLLAR',
 	NUMBER: 'NUMBER',
+	AND: 'AND',
+	OR: 'OR',
 	ID: 'ID',
 	TRUE: 'true',
 	FALSE: 'false',
@@ -26,7 +32,10 @@ var Type = {
 	ID_LIST: 'ID_LIST',
 	VALUE_LIST: 'VALUE_LIST',
 
-	END_OF_INPUT: 'END_OF_INPUT'
+	END_OF_INPUT: 'END_OF_INPUT',
+
+	EXPLICIT: 'EXPLICIT',
+	IMPLICIT: 'IMPLICIT'
 	
 }
 
@@ -168,14 +177,26 @@ Lexer.prototype = {
 				return new Lexeme(Type.OPEN_BRACKET, undefined, this.line, undefined, undefined)
 			case ']':
 				return new Lexeme(Type.CLOSE_BRACKET, undefined, this.line, undefined, undefined)
-/* FIXME: */case '{':
+			case '{':
 				return new Lexeme(Type.OPEN_BRACE, undefined, this.line, undefined, undefined)
-/* FIXME: */case '}':
+			case '}':
 				return new Lexeme(Type.CLOSE_BRACE, undefined, this.line, undefined, undefined)
 			case ':':
 				return new Lexeme(Type.COLON, undefined, this.line, undefined, undefined)
 			case ',':
 				return new Lexeme(Type.COMMA, undefined, this.line, undefined, undefined)
+			case '*':
+				return new Lexeme(Type.SKIP, undefined, this.line, undefined, undefined)
+			case '&':
+				return new Lexeme(Type.AND, undefined, this.line, undefined, undefined)
+			case '|':
+				return new Lexeme(Type.OR, undefined, this.line, undefined, undefined)
+			case '#':
+				return new Lexeme(Type.HASH, undefined, this.line, undefined, undefined)
+			case '@':
+				return new Lexeme(Type.AT, undefined, this.line, undefined, undefined)
+			case '$':
+				return new Lexeme(Type.DOLLAR, undefined, this.line, undefined, undefined)
 			case '-':
 				return new Lexeme(Type.MINUS, undefined, this.line, undefined, undefined)
 			case '"':
