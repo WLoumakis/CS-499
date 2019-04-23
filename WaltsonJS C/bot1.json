@@ -1,0 +1,18 @@
+{
+  "dialog_nodes": [],
+  "pagination": {
+    "refresh_url": "/v1/workspaces/ad3d7543-0d65-43ae-8ce8-0f81d78ce69b/dialog_nodes?version=2019-01-12"
+  }
+}
+{
+  "entities": [],
+  "pagination": {
+    "refresh_url": "/v1/workspaces/ad3d7543-0d65-43ae-8ce8-0f81d78ce69b/entities?version=2019-01-12"
+  }
+}
+{
+  "intents": [],
+  "pagination": {
+    "refresh_url": "/v1/workspaces/ad3d7543-0d65-43ae-8ce8-0f81d78ce69b/intents?version=2019-01-12"
+  }
+}

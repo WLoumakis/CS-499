@@ -1,26 +1,4 @@
 {
-  "intents": [
-    {
-      "intent": "20Q"
-    },
-    {
-      "intent": "no"
-    },
-    {
-      "intent": "yes"
-    }
-  ],
-  "pagination": {
-    "refresh_url": "/v1/workspaces/31e66674-a3cf-4233-be75-15a2c457b105/intents?version=2019-01-12"
-  }
-}
-{
-  "entities": [],
-  "pagination": {
-    "refresh_url": "/v1/workspaces/31e66674-a3cf-4233-be75-15a2c457b105/entities?version=2019-01-12"
-  }
-}
-{
   "dialog_nodes": [
     {
       "type": "event_handler",
@@ -555,5 +533,27 @@
   ],
   "pagination": {
     "refresh_url": "/v1/workspaces/31e66674-a3cf-4233-be75-15a2c457b105/dialog_nodes?version=2019-01-12"
+  }
+}
+{
+  "entities": [],
+  "pagination": {
+    "refresh_url": "/v1/workspaces/31e66674-a3cf-4233-be75-15a2c457b105/entities?version=2019-01-12"
+  }
+}
+{
+  "intents": [
+    {
+      "intent": "20Q"
+    },
+    {
+      "intent": "no"
+    },
+    {
+      "intent": "yes"
+    }
+  ],
+  "pagination": {
+    "refresh_url": "/v1/workspaces/31e66674-a3cf-4233-be75-15a2c457b105/intents?version=2019-01-12"
   }
 }

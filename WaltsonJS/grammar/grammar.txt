@@ -10,15 +10,23 @@
  */
 
 program		:	definition
-			|	definition COMMA program
+			|	definition program
 
-definition	:	ID COLON unary
+definition	:	explicitDef
+			|	implicitDef
+
+explicitDef	:	ID COLON unary
+
+implicitDef	:	unary
 
 unary		:	TRUE
 			|	FALSE
 			|	number
 			|	STRING
-			|	object
+			|	SKIP
+			|	URL
+			|	boolExpr
+//TODO: Remove?			|	object
 			|	array
 
 number		:	nonnegNum
@@ -30,16 +38,33 @@ nonnegNum	:	INTEGER
 negNum		:	UMINUS INTEGER
 			|	UMINUS REAL
 
-object		:	OBRACE optProgram CBRACE
+boolExpr	:	boolUnary
+			|	boolUnary boolOp boolExpr
+			|	OPAREN boolExpr CPAREN
 
-optProgram	:	program
+boolUnary	:	intent
+			|	entity
+			|	context
+
+boolOp		:	AND
+			|	OR
+
+intent		:	HASH ID
+
+entity		:	AT ID
+
+context		:	DOLLAR ID
+
+//TODO: Remove? object		:	OBRACE optProgram CBRACE
+
+//TODO: Remove? optProgram	:	program
 			|	*EMPTY*
 
 array		:	OBRACKET mixinList CBRACKET
 
 mixinList	:	mixin
-			|	mixin COMMA mixinList
+			|	mixin mixinList
 
 mixin		:	definition
-			|	object
+//TODO: Remove?			|	object
 

@@ -1,0 +1,111 @@
+{
+  "dialog_nodes": [
+    {
+      "type": "standard",
+      "title": "20q",
+      "output": {
+        "text": "Is the thing you're thinking of a person?",
+        "generic": [
+          {
+            "title": "",
+            "options": [
+              {
+                "label": "test1",
+                "value": {
+                  "input": {
+                    "text": "$test1val"
+                  }
+                }
+              },
+              {
+                "label": "test2",
+                "value": {
+                  "input": {
+                    "text": "$test2val"
+                  }
+                }
+              },
+              {
+                "label": "test3",
+                "value": {
+                  "input": {
+                    "text": "$test3val"
+                  }
+                }
+              }
+            ],
+            "response_type": "option"
+          }
+        ]
+      },
+      "conditions": "#20q",
+      "dialog_node": "20q"
+    },
+    {
+      "type": "standard",
+      "title": "noActorActress",
+      "output": {
+        "text": "Is the person you're thinking of an author?"
+      },
+      "parent": "yesPerson",
+      "conditions": "$noActorActress",
+      "dialog_node": "noActorActress",
+      "previous_sibling": "yesActorActress"
+    },
+    {
+      "type": "standard",
+      "title": "noAnimal",
+      "output": {
+        "text": "Is this thing a location?"
+      },
+      "parent": "noPerson",
+      "conditions": "$noAnimal",
+      "dialog_node": "noAnimal",
+      "previous_sibling": "yesAnimal"
+    },
+    {
+      "type": "standard",
+      "title": "noPerson",
+      "output": {
+        "text": "Is the thing you're thinking of an animal?"
+      },
+      "parent": "20q",
+      "conditions": "$noPerson",
+      "dialog_node": "noPerson",
+      "previous_sibling": "yesPerson"
+    },
+    {
+      "type": "standard",
+      "title": "yesActorActress",
+      "output": {
+        "text": "Is this person male?"
+      },
+      "parent": "yesPerson",
+      "conditions": "$yesActorActress",
+      "dialog_node": "yesActorActress"
+    },
+    {
+      "type": "standard",
+      "title": "yesAnimal",
+      "output": {
+        "text": "Is the animal you're thinking of a dog?"
+      },
+      "parent": "noPerson",
+      "conditions": "$yesAnimal",
+      "dialog_node": "yesAnimal"
+    },
+    {
+      "type": "standard",
+      "title": "yesPerson",
+      "output": {
+        "text": "Is the person you're thinking about an actor/actress?"
+      },
+      "parent": "20q",
+      "conditions": "$test1val",
+      "dialog_node": "yesPerson"
+    }
+  ],
+  "pagination": {
+    "refresh_url": "/v1/workspaces/67ed01a4-e702-49b7-8af2-b8746d0477f1/dialog_nodes?version=2019-01-12"
+  }
+}

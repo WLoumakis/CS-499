@@ -1,0 +1,11 @@
+{
+  "intents": [
+    {
+      "intent": "20q",
+      "description": ""
+    }
+  ],
+  "pagination": {
+    "refresh_url": "/v1/workspaces/67ed01a4-e702-49b7-8af2-b8746d0477f1/intents?version=2019-01-12"
+  }
+}

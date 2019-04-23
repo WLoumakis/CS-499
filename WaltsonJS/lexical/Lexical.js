@@ -1,5 +1,7 @@
 var Type = {
 	
+	OPEN_PAREN: 'OPEN_PAREN',
+	CLOSE_PAREN: 'CLOSE_PAREN',
 	OPEN_BRACKET: 'OPEN_BRACKET',
 	CLOSE_BRACKET: 'CLOSE_BRACKET',
 	OPEN_BRACE: 'OPEN_BRACE',
@@ -46,10 +48,10 @@ Lexeme.prototype = {
 	getLine: function() {
 		return this.line
 	},
-	getLeft: function() {
+	car: function() {
 		return this.left
 	},
-	getRight: function() {
+	cdr: function() {
 		return this.right
 	},
 	setType: function(type) {
@@ -67,12 +69,12 @@ Lexeme.prototype = {
 		this.line = line
 		return ret
 	},
-	setLeft: function(left) {
+	setCar: function(left) {
 		let ret = this.left
 		this.left = left
 		return ret
 	},
-	setRight: function(right) {
+	setCdr: function(right) {
 		let ret = this.right
 		this.right = right
 		return ret
@@ -158,13 +160,17 @@ Lexer.prototype = {
 		if (ch == undefined)
 			return new Lexeme(Type.END_OF_INPUT, undefined, this.line, undefined, undefined)
 		switch (ch) {
+			case '(':
+				return new Lexeme(Type.OPEN_PAREN, undefined, this.line, undefined, undefined)
+			case ')':
+				return new Lexeme(Type.CLOSE_PAREN, undefined, this.line, undefined, undefined)
 			case '[':
 				return new Lexeme(Type.OPEN_BRACKET, undefined, this.line, undefined, undefined)
 			case ']':
 				return new Lexeme(Type.CLOSE_BRACKET, undefined, this.line, undefined, undefined)
-			case '{':
+/* FIXME: */case '{':
 				return new Lexeme(Type.OPEN_BRACE, undefined, this.line, undefined, undefined)
-			case '}':
+/* FIXME: */case '}':
 				return new Lexeme(Type.CLOSE_BRACE, undefined, this.line, undefined, undefined)
 			case ':':
 				return new Lexeme(Type.COLON, undefined, this.line, undefined, undefined)
