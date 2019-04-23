@@ -16,15 +16,16 @@ definition	:	explicitDef
 			|	implicitDef
 
 explicitDef	:	ID COLON unary
+			|	STRING COLON unary
 
 implicitDef	:	unary
 
-unary		:	ID
-			|	TRUE
+unary		:	TRUE
 			|	FALSE
-			|	number
 			|	STRING
 			|	SKIP
+			|	URL
+			|	number
 			|	boolExpr
 			|	object
 			|	array
@@ -55,12 +56,18 @@ entity		:	AT ID
 
 context		:	DOLLAR ID
 
-object		:	OBRACE optProgram CBRACE
+object		:	OBRACE optAttrList CBRACE
 
-optProgram	:	program
+optAttrList	:	attrList
 			|	*EMPTY*
 
-array		:	OBRACKET mixinList CBRACKET
+attrList	:	definition
+			|	definition attrList
+
+array		:	OBRACKET optMixinList CBRACKET
+
+optMixinList:	mixinList
+			|	*EMPTY*
 
 mixinList	:	mixin
 			|	mixin mixinList

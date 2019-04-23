@@ -13,7 +13,7 @@ iam_apikey: "K4V31w-LlqPmAalrBF63xQ9Ty0yF7o330TxkpxeesRqB"
 
 [
 	name: "20 questions"
-	cond: (#20q || #30_questions) && @sys-time
+	cond: (#20q || #30 questions) && @sys-time
 	http://imagebank.com
 	"Is the thing you're thinking of a person?"
 	answers: [

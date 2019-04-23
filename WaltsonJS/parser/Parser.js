@@ -11,6 +11,7 @@ var Type = {
 	MINUS: 'MINUS',
 	STRING: 'STRING',
 	SKIP: 'SKIP',
+	URL: 'URL',
 	HASH: 'HASH',
 	AT: 'AT',
 	DOLLAR: 'DOLLAR',
@@ -122,7 +123,7 @@ Lexer.prototype = {
 		this.putBack(ch)
 	},
 	lexString: function() {
-		let ch = this.readChar()		// Gets first "
+		let ch = this.readChar()		// Gets first quote
 		let ret = ""
 		while ((ch = this.readChar()) != '"') {
 			ret += ch
@@ -130,6 +131,16 @@ Lexer.prototype = {
 		// Throw away the terminating quote by not pushing back
 
 		return new Lexeme(Type.STRING, ret, this.line, undefined, undefined)
+	},
+	lexURL: function() {
+		let ch = this.readChar()		// Gets first angle bracket
+		let ret = ""
+		while ((ch = this.readChar()) != '>') {
+			ret += ch
+		}
+		// Throw away the terminating angle bracket by not pushing back
+
+		return new Lexeme(Type.URL, ret, this.line, undefined, undefined)
 	},
 	lexNumber: function() {
 		let ch = this.readChar()
@@ -202,6 +213,9 @@ Lexer.prototype = {
 			case '"':
 				this.putBack(ch)
 				return this.lexString()
+			case '<':
+				this.putBack(ch)
+				return this.lexURL()
 			default:
 				if (/\d/.test(ch)) {
 					this.putBack(ch)
@@ -212,7 +226,7 @@ Lexer.prototype = {
 					return this.lexVar()
 				}
 				else {
-					throw Error('Error on line ' + this.line + ': could not understand character ${ch}!')
+					throw Error('Error on line ' + this.line + ': could not understand character ' + ch + '!')
 				}
 		}
 	}
@@ -233,7 +247,7 @@ Parser.prototype = {
 	match: function(expected) {
 		if (this.check(expected))
 			return this.advance()
-		console.error('Error on line ', this.current.getLine(), ': expected', expected, ', got ', this.current.getType())
+		console.error('Error on line ' + this.current.getLine() + ': expected ' + expected + ', got ' + this.current.getType())
 		throw Error('illegal')
 	},
 	check: function(expected) {
@@ -249,6 +263,8 @@ Parser.prototype = {
 	program: function() {
 		let a, b
 		a = this.definition()
+		if (this.check(Type.COMMA))
+			this.advance()
 		if (this.definitionPending())
 			b = this.program()
 		else
@@ -256,25 +272,33 @@ Parser.prototype = {
 		return Lexeme.prototype.cons(Type.PROGRAM, a, b)
 	},
 	definition: function() {
-		if (this.explicitDefPending())
+		if (this.check(Type.ID))
 			return this.explicitDef()
+		else if (this.check(Type.STRING)) {
+			let a = this.advance()
+			if (this.check(Type.COLON)) {
+				this.advance()
+				return Lexeme.prototype.cons(Type.EXPLICIT, a, this.unary())
+			}
+			return Lexeme.prototype.cons(Type.IMPLICIT, a, null)
+		}
 		else
 			return this.implicitDef()
 	},
 	explicitDef: function() {
-		this.match(Type.ID)
+		let a = this.match(Type.ID)
 		this.match(Type.COLON)
-		return Lexeme.prototype.cons(Type.EXPLICIT, this.unary(), null)
+		return Lexeme.prototype.cons(Type.EXPLICIT, a, this.unary())
 	},
 	implicitDef: function() {
 		return Lexeme.prototype.cons(Type.IMPLICIT, this.unary(), null)
 	},
 	unary: function() {
-		if (this.check(Type.ID) ||
-			this.check(Type.TRUE) ||
+		if (this.check(Type.TRUE) ||
 			this.check(Type.FALSE) ||
 			this.check(Type.STRING) ||
-			this.check(Type.SKIP))
+			this.check(Type.SKIP) ||
+			this.check(Type.URL))
 				return this.advance()
 		else if (this.numberPending())
 			return this.number()
@@ -355,10 +379,10 @@ Parser.prototype = {
 	attrList: function() {
 		let a, b
 		a = this.definition()
-		if (this.check(Type.COMMA)) {
+		if (this.check(Type.COMMA))
 			this.advance()
+		if (this.attrListPending())
 			b = this.attrList()
-		}
 		else
 			b = null
 		return Lexeme.prototype.cons(Type.ATTRIBUTE_LIST, a, b)
@@ -366,17 +390,22 @@ Parser.prototype = {
 	array: function() {
 		let a
 		this.match(Type.OPEN_BRACKET)
-		a = this.mixinList()
+		a = this.optMixinList()
 		this.match(Type.CLOSE_BRACKET)
-		return a
+		return Lexeme.prototype.cons(Type.OPEN_BRACKET, null, a)
+	},
+	optMixinList: function() {
+		if (this.mixinListPending())
+			return this.mixinList()
+		return null
 	},
 	mixinList: function() {
 		let a, b
 		a = this.mixin()
-		if (this.check(Type.COMMA)) {
+		if (this.check(Type.COMMA))
 			this.advance()
+		if (this.mixinListPending())
 			b = this.mixinList()
-		}
 		else
 			b = null
 		return Lexeme.prototype.cons(Type.MIXIN_LIST, a, b)
@@ -388,21 +417,19 @@ Parser.prototype = {
 			return this.object()
 	},
 	definitionPending: function() {
-		return (this.explicitDefPending() ||
+		return (this.check(Type.ID) ||
+				this.check(Type.STRING) ||
 				this.implicitDefPending())
-	},
-	explicitDefPending: function() {
-		return this.check(Type.ID)
 	},
 	implicitDefPending: function() {
 		return this.unaryPending()
 	},
 	unaryPending: function() {
-		return (this.check(Type.ID) ||
-				this.check(Type.TRUE) || 
+		return (this.check(Type.TRUE) || 
 				this.check(Type.FALSE) ||
 				this.check(Type.STRING) ||
 				this.check(Type.SKIP) ||
+				this.check(Type.URL) ||
 				this.numberPending() ||
 				this.boolExprPending() ||
 				this.objectPending() ||
@@ -411,6 +438,24 @@ Parser.prototype = {
 	numberPending: function() {
 		return (this.nonNegNumPending() ||
 				this.negNumPending())
+	},
+	boolExprPending: function() {
+		return (this.check(Type.OPEN_PAREN) ||
+				this.boolUnaryPending())
+	},
+	boolUnaryPending: function() {
+		return (this.intentPending() ||
+				this.entityPending() ||
+				this.contextPending())
+	},
+	intentPending: function() {
+		return this.check(Type.HASH)
+	},
+	entityPending: function() {
+		return this.check(Type.AT)
+	},
+	contextPending: function() {
+		return this.check(Type.DOLLAR)
 	},
 	nonNegNumPending: function() {
 		return this.check(Type.NUMBER)
@@ -423,6 +468,16 @@ Parser.prototype = {
 	},
 	attrListPending: function() {
 		return this.definitionPending()
+	},
+	arrayPending: function() {
+		return this.check(Type.OPEN_BRACKET)
+	},
+	mixinListPending: function() {
+		return this.mixinPending()
+	},
+	mixinPending: function() {
+		return (this.definitionPending() ||
+				this.objectPending())
 	}
 }
 

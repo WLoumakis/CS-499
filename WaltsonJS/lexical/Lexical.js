@@ -11,6 +11,7 @@ var Type = {
 	MINUS: 'MINUS',
 	STRING: 'STRING',
 	SKIP: 'SKIP',
+	URL: 'URL',
 	HASH: 'HASH',
 	AT: 'AT',
 	DOLLAR: 'DOLLAR',
@@ -122,7 +123,7 @@ Lexer.prototype = {
 		this.putBack(ch)
 	},
 	lexString: function() {
-		let ch = this.readChar()		// Gets first "
+		let ch = this.readChar()		// Gets first quote
 		let ret = ""
 		while ((ch = this.readChar()) != '"') {
 			ret += ch
@@ -130,6 +131,16 @@ Lexer.prototype = {
 		// Throw away the terminating quote by not pushing back
 
 		return new Lexeme(Type.STRING, ret, this.line, undefined, undefined)
+	},
+	lexURL: function() {
+		let ch = this.readChar()		// Gets first angle bracket
+		let ret = ""
+		while ((ch = this.readChar()) != '>') {
+			ret += ch
+		}
+		// Throw away the terminating angle bracket by not pushing back
+
+		return new Lexeme(Type.URL, ret, this.line, undefined, undefined)
 	},
 	lexNumber: function() {
 		let ch = this.readChar()
@@ -202,6 +213,9 @@ Lexer.prototype = {
 			case '"':
 				this.putBack(ch)
 				return this.lexString()
+			case '<':
+				this.putBack(ch)
+				return this.lexURL()
 			default:
 				if (/\d/.test(ch)) {
 					this.putBack(ch)
@@ -212,7 +226,7 @@ Lexer.prototype = {
 					return this.lexVar()
 				}
 				else {
-					throw Error('Error on line ' + this.line + ': could not understand character ${ch}!')
+					throw Error('Error on line ' + this.line + ': could not understand character ' + ch + '!')
 				}
 		}
 	}
