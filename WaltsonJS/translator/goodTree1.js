@@ -1,8 +1,8 @@
-var workspace_id = "67ed01a4-e702-49b7-8af2-b8746d0477f1"
-var iam_apikey = "K4V31w-LlqPmAalrBF63xQ9Ty0yF7o330TxkpxeesRqB"
-var version = "2019-01-12"
-var url = "https://gateway.watsonplatform.net/assistant/api"
-var dialog_nodes = [
+workspace_id = "67ed01a4-e702-49b7-8af2-b8746d0477f1"
+iam_apikey = "K4V31w-LlqPmAalrBF63xQ9Ty0yF7o330TxkpxeesRqB"
+version = "2019-01-12"
+url = "https://gateway.watsonplatform.net/assistant/api"
+dialog_nodes = [
 	{
 		conditions: "#20q",
 		dialog_node: "20q",

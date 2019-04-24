@@ -660,13 +660,13 @@ Pretty.prototype = {
 				this.printBoolExpr(tree)
 				break
 			case Type.HASH:
-				this.printIntent(tree)
+				fs.appendFileSync(this.outfile, '#' + tree.getValue())
 				break
 			case Type.AT:
-				this.printEntity(tree)
+				fs.appendFileSync(this.outfile, '@' + tree.getValue())
 				break
 			case Type.DOLLAR:
-				this.printContext(tree)
+				fs.appendFileSync(this.outfile, '$' + tree.getValue())
 				break
 			case Type.AND:
 				this.printAnd(tree)
@@ -721,21 +721,6 @@ Pretty.prototype = {
 		fs.appendFileSync(this.outfile, "(")
 		this.pp(tree.cdr())
 		fs.appendFileSync(this.outfile, ")")
-	},
-
-	printIntent: function(tree) {
-		fs.appendFileSync(this.outfile, "#")
-		fs.appendFileSync(this.outfile, tree.getValue())
-	},
-
-	printEntity: function(tree) {
-		fs.appendFileSync(this.outfile, "@")
-		fs.appendFileSync(this.outfile, tree.getValue())
-	},
-
-	printContext: function(tree) {
-		fs.appendFileSync(this.outfile, "$")
-		fs.appendFileSync(this.outfile, tree.getValue())
 	},
 
 	printAnd: function(tree) {

@@ -798,6 +798,7 @@ var Translator = function(outfile) {
 	this.outfile = outfile
 	this.numTabs = 0
 	this.inObject = false
+	this.inExpr = false
 }
 
 Translator.prototype = {
@@ -819,6 +820,11 @@ Translator.prototype = {
 			case Type.STRING:
 				fs.appendFileSync(this.outfile, '"' + tree.getValue() + '"')
 				break
+			case Type.SKIP:
+				break
+			case Type.URL:
+				fs.appendFileSync(this.outfile, '"' + tree.getValue() + '"')
+				break
 			case Type.NUMBER:
 				fs.appendFileSync(this.outfile, tree.getValue())
 				break
@@ -828,20 +834,44 @@ Translator.prototype = {
 			case Type.PROGRAM:
 				this.translateProgram(tree)
 				break
+			case Type.EXPLICIT:
+				this.translateExplicit(tree)
+				break
+			case Type.IMPLICIT:
+				this.translateImplicit(tree)
+				break
 			case Type.MINUS:
 				this.translateMinus(tree)
 				break
-			case Type.COLON:
-				this.translateAssign(tree)
+			case Type.OPEN_PAREN:
+				this.translateBoolExpr(tree)
 				break
-			case Type.OBJECT:
+			case Type.HASH:
+				this.translateIntent(tree)
+				break
+			case Type.AT:
+				this.translateEntity(tree)
+				break
+			case Type.DOLLAR:
+				this.translateContext(tree)
+				break
+			case Type.AND:
+				this.translateAnd(tree)
+				break
+			case Type.OR:
+				this.translateOr(tree)
+				break
+			case Type.OPEN_BRACE:
 				this.translateObject(tree)
 				break
 			case Type.ATTRIBUTE_LIST:
 				this.translateAttributeList(tree)
 				break
-			case Type.MIXIN_LIST:
+			case Type.OPEN_BRACKET:
 				this.translateArray(tree)
+				break
+			case Type.MIXIN_LIST:
+				this.translateMixinList(tree)
 				break
 			default:
 				throw Error('Error translating type ' + tree.getType() + '!')
@@ -852,33 +882,108 @@ Translator.prototype = {
 		fs.writeFileSync(this.outfile, '')
 		while (tree != null) {
 			this.printTabs()
-			this.translate(tree.getLeft())
-			tree = tree.getRight()
+			this.translate(tree.car())
+			tree = tree.cdr()
 			fs.appendFileSync(this.outfile, '\n')
 		}
 	},
 
-	translateMinus: function(tree) {
-		fs.appendFileSync(this.outfile, '-')
-		this.translate(tree.getRight())
-	},
-
-	translateAssign: function(tree) {
-		if (!this.inObject)
-			fs.appendFileSync(this.outfile, 'var ')
-		this.translate(tree.getLeft())
+	translateExplicit: function(tree) {
+		this.translate(tree.car())
 		if (this.inObject)
 			fs.appendFileSync(this.outfile, ': ')
-		else fs.appendFileSync(this.outfile, ' = ')
-		this.translate(tree.getRight())
+		else
+			fs.appendFileSync(this.outfile, ' = ')
+		this.translate(tree.cdr())
+		this.inExpr = false
+	},
+
+	translateImplicit: function(tree) {
+		this.translate(tree.car())
+	},
+
+	translateMinus: function(tree) {
+		fs.appendFileSync(this.outfile, '-')
+		this.translate(tree.cdr())
+	},
+
+	translateBoolExpr: function(tree) {
+		if (this.inExpr == false) {
+			fs.appendFileSync(this.outfile, '"(')
+			this.inExpr = true
+			this.translate(tree.cdr())
+			this.inExpr = false
+			fs.appendFileSync(this.outfile, ')"')
+		}
+		else {
+			fs.appendFileSync(this.outfile, '(')
+			this.translate(tree.cdr())
+			fs.appendFileSync(this.outfile, ')')
+		}
+	},
+
+	translateIntent: function(tree) {
+		if (this.inExpr == false)
+			fs.appendFileSync(this.outfile, '"#' + tree.getValue() + '"')
+		else
+			fs.appendFileSync(this.outfile, '#' + tree.getValue())
+	},
+
+	translateEntity: function(tree) {
+		if (this.inExpr == false)
+			fs.appendFileSync(this.outfile, '"@' + tree.getValue() + '"')
+		else
+			fs.appendFileSync(this.outfile, '@' + tree.getValue())
+	},
+
+	translateContext: function(tree) {
+		if (this.inExpr == false)
+			fs.appendFileSync(this.outfile, '"$' + tree.getValue() + '"')
+		else
+			fs.appendFileSync(this.outfile, '$' + tree.getValue())
+	},
+
+	translateAnd: function(tree) {
+		if (this.inExpr == false) {
+			fs.appendFileSync(this.outfile, '"')
+			this.inExpr = true
+			this.translate(tree.car())
+			fs.appendFileSync(this.outfile, ' && ')
+			this.translate(tree.cdr())
+			this.inExpr = false
+			fs.appendFileSync(this.outfile, '"')
+
+		}
+		else {
+			this.translate(tree.car())
+			fs.appendFileSync(this.outfile, ' && ')
+			this.translate(tree.cdr())
+		}
+	},
+
+	translateOr: function(tree) {
+		if (this.inExpr == false) {
+			fs.appendFileSync(this.outfile, '"')
+			this.inExpr = true
+			this.translate(tree.car())
+			fs.appendFileSync(this.outfile, ' || ')
+			this.translate(tree.cdr())
+			this.inExpr = false
+			fs.appendFileSync(this.outfile, '"')
+		}
+		else {
+			this.translate(tree.car())
+			fs.appendFileSync(this.outfile, ' || ')
+			this.translate(tree.cdr())
+		}
 	},
 
 	translateObject: function(tree) {
 		fs.appendFileSync(this.outfile, '{')
-		if (tree.getLeft() != null) {
+		if (tree.cdr() != null) {
 			fs.appendFileSync(this.outfile, '\n')
 			this.numTabs++
-			this.translate(tree.getLeft())
+			this.translate(tree.cdr())
 			this.numTabs--
 			this.printTabs()
 		}
@@ -889,8 +994,8 @@ Translator.prototype = {
 		while (tree != null) {
 			this.inObject = 1
 			this.printTabs()
-			this.translate(tree.getLeft())
-			tree = tree.getRight()
+			this.translate(tree.car())
+			tree = tree.cdr()
 			if (tree != null)
 				fs.appendFileSync(this.outfile, ',')
 			fs.appendFileSync(this.outfile, '\n')
@@ -899,19 +1004,26 @@ Translator.prototype = {
 	},
 
 	translateArray: function(tree) {
-		fs.appendFileSync(this.outfile, '[\n')
-		this.numTabs++
+		fs.appendFileSync(this.outfile, '[')
+		if (tree.cdr() != null) {
+			fs.appendFileSync(this.outfile, '\n')
+			this.numTabs++
+			this.translate(tree.cdr())
+			this.numTabs--
+			this.printTabs()
+		}
+		fs.appendFileSync(this.outfile, ']')
+	},
+
+	translateMixinList: function(tree) {
 		while (tree != null) {
 			this.printTabs()
-			this.translate(tree.getLeft())
-			tree = tree.getRight()
+			this.translate(tree.car())
+			tree = tree.cdr()
 			if (tree != null)
 				fs.appendFileSync(this.outfile, ',')
 			fs.appendFileSync(this.outfile, '\n')
 		}
-		this.numTabs--
-		this.printTabs()
-		fs.appendFileSync(this.outfile, ']')
 	}
 
 }
