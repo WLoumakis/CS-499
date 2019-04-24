@@ -42,9 +42,6 @@ negNum		:	UMINUS INTEGER
 boolExpr	:	boolUnary
 			|	boolUnary boolOp boolExpr
 
-optExpr		:	boolOp boolExpr
-			|	*EMPTY*
-
 boolUnary	:	intent
 			|	entity
 			|	context

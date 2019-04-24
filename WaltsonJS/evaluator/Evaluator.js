@@ -102,6 +102,64 @@ Lexeme.prototype = {
 
 	cons: function(type, left, right) {
 		return new Lexeme(type, undefined, undefined, left, right)
+	},
+
+	displayLexeme() {
+		switch (this.type) {
+			case Type.ID:
+				console.log(this.value)
+				break
+			case Type.STRING:
+				console.log('"' + this.value + '"')
+				break
+			case Type.SKIP:
+				console.log('')
+				break
+			case Type.NUMBER:
+				console.log(this.value)
+				break
+			case Type.ENVIRONMENT:
+				console.log(this.value + '.ENVIRONMENT')
+				break
+			case Type.TRUE:
+				console.log('true')
+				break
+			case Type.FALSE:
+				console.log('false')
+				break
+			case Type.HASH:
+				console.log(this.value)
+				break
+			case Type.AT:
+				console.log(this.value)
+				break
+			case Type.DOLLAR:
+				console.log(this.value)
+				break
+			case Type.URL:
+				console.log('<' + this.value + '>')
+				break
+			case Type.OPEN_PAREN:
+				console.log('BOOLEAN EXPRESSION')
+				break
+			case Type.AND:
+				console.log('&&')
+				break
+			case Type.OR:
+				console.log('||')
+				break
+			case Type.OPEN_BRACE:
+				console.log('OBJECT')
+				break
+			case Type.OPEN_BRACKET:
+				console.log('ARRAY')
+				break
+			case Type.ARRAY:
+				console.log(this.value)
+				break
+			default:
+				throw Error('Error displaying value with type ' + this.type + '!')
+		}
 	}
 
 }
@@ -1029,7 +1087,9 @@ Translator.prototype = {
 }
 
 var Environment = function() {
-	return Lexeme.prototype.cons(Type.ENVIRONMENT, Lexeme.prototype.cons(Type.TABLE, null, null), null)
+	let env = Lexeme.prototype.cons(Type.ENVIRONMENT, Lexeme.prototype.cons(Type.TABLE, null, null), null)
+	env.setValue(Type.ENVIRONMENT)
+	return env
 }
 
 Environment.prototype = {
@@ -1160,8 +1220,10 @@ Environment.prototype = {
 		throw Error('Error deleting ', variable.getValue(), ': Could not find variable within scope!')
 	},
 
-	extend: function(env, vars, vals) {
-		return Lexeme.prototype.cons(Type.ENVIRONMENT, Lexeme.prototype.cons(Type.TABLE, vars, vals), env)
+	extend: function(env, type, vars, vals) {
+		let xenv = Lexeme.prototype.cons(Type.ENVIRONMENT, Lexeme.prototype.cons(Type.TABLE, vars, vals), env)
+		xenv.setValue(type)
+		return xenv
 	},
 
 	displayEnvironment: function(env) {
@@ -1208,22 +1270,42 @@ Evaluator.prototype = {
 				return tree
 			case Type.STRING:
 				return tree
+			case Type.SKIP:
+				return tree
+			case Type.URL:
+				return tree
 			case Type.NUMBER:
 				return tree
 			case Type.ID:
 				return Environment.prototype.lookup(env, tree)
 			case Type.PROGRAM:
 				return this.evalProgram(tree, env)
+			case Type.EXPLICIT:
+				return this.evalExplicit(tree, env)
+			case Type.IMPLICIT:
+				return this.evalImplicit(tree, env)
 			case Type.MINUS:
 				return this.evalMinus(tree, env)
-			case Type.COLON:
-				return this.evalAssign(tree, env)
-			case Type.OBJECT:
+			case Type.OPEN_PAREN:
+				return tree
+			case Type.HASH:
+				return tree
+			case Type.AT:
+				return tree
+			case Type.DOLLAR:
+				return tree
+			case Type.AND:
+				return tree
+			case Type.OR:
+				return tree
+			case Type.OPEN_BRACE:
 				return this.evalObject(tree, env)
 			case Type.ATTRIBUTE_LIST:
 				return this.evalAttributeList(tree, env)
-			case Type.MIXIN_LIST:
+			case Type.OPEN_BRACKET:
 				return this.evalArray(tree, env)
+			case Type.MIXIN_LIST:
+				return this.evalMixinList(tree, env)
 			default:
 				throw Error('Error evaluating type ' + tree.getType() + '!')
 		}
@@ -1238,20 +1320,26 @@ Evaluator.prototype = {
 		return ret
 	},
 
-	evalMinus: function(tree, env) {
-		let num = this.eval(tree.cdr(), env)
-		return new Lexeme(Type.NUMBER, -1 * num, undefined, undefined, undefined)
-	},
-
-	evalAssign: function(tree, env) {
+	evalExplicit: function(tree, env) {
 		let id = tree.car()
 		let result = this.eval(tree.cdr(), env)
 		return Environment.prototype.insert(env, id, result)
 	},
 
+	evalImplicit: function(tree, env) {
+		let id = new Lexeme(Type.ID, "unbound", undefined, undefined, undefined)
+		let result = this.eval(tree.car(), env)
+		return Environment.prototype.insert(env, id, result)
+	},
+
+	evalMinus: function(tree, env) {
+		let num = this.eval(tree.cdr(), env)
+		return new Lexeme(Type.NUMBER, -1 * num, undefined, undefined, undefined)
+	},
+
 	evalObject: function(tree, env) {
-		let xenv = Environment.prototype.extend(env, null, null)
-		this.eval(tree.car(), xenv)
+		let xenv = Environment.prototype.extend(env, Type.OBJECT, null, null)
+		this.eval(tree.cdr(), xenv)
 		return xenv
 	},
 
@@ -1264,13 +1352,13 @@ Evaluator.prototype = {
 		return ret
 	},
 
-	evalArray: function(list, env) {
-		let temp = list
-		let count = 0
-		while (temp != null) {
-			temp = temp.cdr()
-			count++
-		}
+	evalArray: function(tree, env) {
+		let xenv = Environment.prototype.extend(env, Type.ARRAY, null, null)
+		this.eval(tree.cdr(), xenv)
+		return xenv
+	},
+
+	evalMixinList: function(list, env) {
 		let arr = []
 		while (list != null) {
 			arr.push(this.eval(list.car(), env))
