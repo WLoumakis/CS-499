@@ -615,10 +615,6 @@ var Pretty = function(outfile) {
 
 Pretty.prototype = {
 
-	getBuffer: function() {
-		return this.buffer
-	},
-
 	printTabs: function() {
 		for (let i = 0; i < this.numTabs; i++)
 			fs.appendFileSync(this.outfile, '\t')
