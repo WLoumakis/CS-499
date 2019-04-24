@@ -10,6 +10,11 @@ var rl = require('readline-sync')
 function changeExtension(str) {
 	let result = ''
 	let ind = str.indexOf('.')
+	if (ind == -1) {
+		result += str
+		result += '.js'
+		return result
+	}
 	for (let i = 0; i < ind; i++)
 		result += str[i]
 	result += '.js'
@@ -24,7 +29,7 @@ function warn(outfile) {
 	else if (result.toLowerCase() == 'n')
 		return false
 	else
-		return warn()
+		return warn(outfile)
 }
 
 function enqueueHelper(node) {

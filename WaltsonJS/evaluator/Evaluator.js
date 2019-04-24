@@ -1096,8 +1096,20 @@ Environment.prototype = {
 
 	insert: function(env, variable, value) {
 		let table = env.car()
-		table.setCar(Lexeme.prototype.cons(Type.ID_LIST, variable, table.car()))
-		table.setCdr(Lexeme.prototype.cons(Type.VALUE_LIST, value, table.cdr()))
+		if (table.car() == null) {
+			table.setCar(Lexeme.prototype.cons(Type.ID_LIST, variable, null))
+			table.setCdr(Lexeme.prototype.cons(Type.VALUE_LIST, value, null))
+		}
+		else {
+			let vars = table.car()
+			let vals = table.cdr()
+			while (vars.cdr() != null) {
+				vars = vars.cdr()
+				vals = vals.cdr()
+			}
+			vars.setCdr(Lexeme.prototype.cons(Type.ID_LIST, variable, null))
+			vals.setCdr(Lexeme.prototype.cons(Type.ID_LIST, value, null))
+		}
 	},
 
 	lookup: function(env, variable) {
