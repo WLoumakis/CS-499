@@ -1,5 +1,7 @@
 var Type = {
 	
+	OPEN_PAREN: 'OPEN_PAREN',
+	CLOSE_PAREN: 'CLOSE_PAREN',
 	OPEN_BRACKET: 'OPEN_BRACKET',
 	CLOSE_BRACKET: 'CLOSE_BRACKET',
 	OPEN_BRACE: 'OPEN_BRACE',
@@ -8,7 +10,14 @@ var Type = {
 	COMMA: 'COMMA',
 	MINUS: 'MINUS',
 	STRING: 'STRING',
+	SKIP: 'SKIP',
+	URL: 'URL',
+	HASH: 'HASH',
+	AT: 'AT',
+	DOLLAR: 'DOLLAR',
 	NUMBER: 'NUMBER',
+	AND: 'AND',
+	OR: 'OR',
 	ID: 'ID',
 	TRUE: 'true',
 	FALSE: 'false',
@@ -24,7 +33,11 @@ var Type = {
 	ID_LIST: 'ID_LIST',
 	VALUE_LIST: 'VALUE_LIST',
 
-	END_OF_INPUT: 'END_OF_INPUT'
+	END_OF_INPUT: 'END_OF_INPUT',
+
+	EXPLICIT: 'EXPLICIT',
+	IMPLICIT: 'IMPLICIT',
+	EXPRESSION: 'EXPRESSION'
 	
 }
 
@@ -37,7 +50,6 @@ var Lexeme = function(type, val, line, left, right) {
 }
 
 Lexeme.prototype = {
-
 	getType: function() {
 		return this.type
 	},
@@ -50,11 +62,11 @@ Lexeme.prototype = {
 		return this.line
 	},
 
-	getLeft: function() {
+	car: function() {
 		return this.left
 	},
 
-	getRight: function() {
+	cdr: function() {
 		return this.right
 	},
 
@@ -76,13 +88,13 @@ Lexeme.prototype = {
 		return ret
 	},
 
-	setLeft: function(left) {
+	setCar: function(left) {
 		let ret = this.left
 		this.left = left
 		return ret
 	},
 
-	setRight: function(right) {
+	setCdr: function(right) {
 		let ret = this.right
 		this.right = right
 		return ret
@@ -90,20 +102,6 @@ Lexeme.prototype = {
 
 	cons: function(type, left, right) {
 		return new Lexeme(type, undefined, undefined, left, right)
-	},
-
-	displayLexeme: function() {
-		switch (this.type) {
-			case Type.STRING:
-				console.log('"' + this.value + '"')
-				break
-			case Type.NUMBER:
-				console.log(this.value)
-				break
-			default:
-				console.log(this.type)
-				break
-		}
 	}
 
 }
@@ -141,14 +139,35 @@ Lexer.prototype = {
 	},
 
 	lexString: function() {
-		let ch = this.readChar()		// Gets first "
+		let ch
+		let last
 		let ret = ""
-		while ((ch = this.readChar()) != '"') {
+		while ((ch = this.readChar()) != '"' || (ch == '"'  && last == '\\')) {
 			ret += ch
+			last = ch
 		}
 		// Throw away the terminating quote by not pushing back
 
+		// If we didn't read anything, throw an error.
+		if (ret.length == 0)
+			throw Error('Error on line ' + this.line + ': a string must not be empty!')
+
 		return new Lexeme(Type.STRING, ret, this.line, undefined, undefined)
+	},
+
+	lexURL: function() {
+		let ch
+		let ret = ""
+		while ((ch = this.readChar()) != '>') {
+			ret += ch
+		}
+		// Throw away the terminating angle bracket by not pushing back
+
+		// If we didn't read anything, throw an error.
+		if (ret.length == 0)
+			throw Error('Error on line ' + this.line + ': a URL must not be empty!')
+
+		return new Lexeme(Type.URL, ret, this.line, undefined, undefined)
 	},
 
 	lexNumber: function() {
@@ -185,12 +204,76 @@ Lexer.prototype = {
 		return new Lexeme(Type.ID, ret, this.line, undefined, undefined)
 	},
 
+	lexIntent: function() {
+		let ret = ""
+		let ch = this.readChar()
+
+		// We only want alphanumeric, underscore, hyphen, and dot characters
+		while (/[a-zA-Z0-9\_\-\.]/.test(ch)) {
+			ret += ch
+			ch = this.readChar()
+		}
+
+		// If we didn't read anything, throw an error.
+		if (ret.length == 0)
+			throw Error('Error on line ' + this.line + ': An intent must have a name!')
+
+		// A white-space character broke us out of the loop, so put it back.
+		this.putBack(ch)
+
+		return new Lexeme(Type.HASH, ret, this.line, undefined, undefined)
+	},
+
+	lexEntity: function() {
+		let ret = ""
+		let ch = this.readChar()
+
+		// We only want alphanumeric, underscore, hyphen, and dot characters
+		while (/[a-zA-Z0-9\_\-\.]/.test(ch)) {
+			ret += ch
+			ch = this.readChar()
+		}
+
+		// If we didn't read anything, throw an error.
+		if (ret.length == 0)
+			throw Error('Error on line ' + this.line + ': An entity must have a name!')
+
+		// A white-space character broke us out of the loop, so put it back.
+		this.putBack(ch)
+
+		return new Lexeme(Type.AT, ret, this.line, undefined, undefined)
+	},
+
+	lexContext: function() {
+		let ret = ""
+		let ch = this.readChar()
+
+		// We only want alphanumeric, underscore, hyphen, and dot characters
+		while (/[a-zA-Z0-9\_\-\.]/.test(ch)) {
+			ret += ch
+			ch = this.readChar()
+		}
+
+		// If we didn't read anything, throw an error.
+		if (ret.length == 0)
+			throw Error('Error on line ' + this.line + ': A context variable must have a name!')
+
+		// A white-space character broke us out of the loop, so put it back.
+		this.putBack(ch)
+
+		return new Lexeme(Type.DOLLAR, ret, this.line, undefined, undefined)
+	},
+
 	lex: function() {
 		this.skipWhiteSpace()
 		let ch = this.readChar()
 		if (ch == undefined)
 			return new Lexeme(Type.END_OF_INPUT, undefined, this.line, undefined, undefined)
 		switch (ch) {
+			case '(':
+				return new Lexeme(Type.OPEN_PAREN, undefined, this.line, undefined, undefined)
+			case ')':
+				return new Lexeme(Type.CLOSE_PAREN, undefined, this.line, undefined, undefined)
 			case '[':
 				return new Lexeme(Type.OPEN_BRACKET, undefined, this.line, undefined, undefined)
 			case ']':
@@ -203,11 +286,19 @@ Lexer.prototype = {
 				return new Lexeme(Type.COLON, undefined, this.line, undefined, undefined)
 			case ',':
 				return new Lexeme(Type.COMMA, undefined, this.line, undefined, undefined)
+			case '*':
+				return new Lexeme(Type.SKIP, undefined, this.line, undefined, undefined)
+			case '&':
+				return new Lexeme(Type.AND, undefined, this.line, undefined, undefined)
+			case '|':
+				return new Lexeme(Type.OR, undefined, this.line, undefined, undefined)
 			case '-':
 				return new Lexeme(Type.MINUS, undefined, this.line, undefined, undefined)
-			case '"':
-				this.putBack(ch)
-				return this.lexString()
+			case '"': return this.lexString()
+			case '<': return this.lexURL()
+			case '#': return this.lexIntent()
+			case '@': return this.lexEntity()
+			case '$': return this.lexContext()
 			default:
 				if (/\d/.test(ch)) {
 					this.putBack(ch)
@@ -218,7 +309,7 @@ Lexer.prototype = {
 					return this.lexVar()
 				}
 				else {
-					throw Error('Error on line ' + this.line + ': could not understand character ${ch}!')
+					throw Error('Error on line ' + this.line + ': could not understand character ' + ch + '!')
 				}
 		}
 	}
@@ -242,7 +333,8 @@ Parser.prototype = {
 	match: function(expected) {
 		if (this.check(expected))
 			return this.advance()
-		throw Error('Error on line ' + this.current.getLine() + ': expected ' + expected + ', got ' + this.current.getType())
+		console.error('Error on line ' + this.current.getLine() + ': expected ' + expected + ', got ' + this.current.getType())
+		throw Error('illegal')
 	},
 
 	check: function(expected) {
@@ -253,36 +345,59 @@ Parser.prototype = {
 
 	advance: function() {
 		let temp = this.current
-		if (!this.check(Type.END_OF_INPUT))
-			this.current = this.lexer.lex()
+		this.current = this.lexer.lex()
 		return temp
 	},
 
 	program: function() {
 		let a, b
 		a = this.definition()
-		if (this.check(Type.COMMA)) {
+		if (this.check(Type.COMMA))
 			this.advance()
+		if (this.definitionPending())
 			b = this.program()
-		}
 		else
 			b = null
 		return Lexeme.prototype.cons(Type.PROGRAM, a, b)
 	},
 
 	definition: function() {
+		if (this.check(Type.ID))
+			return this.explicitDef()
+		else if (this.check(Type.STRING)) {
+			let a = this.advance()
+			if (this.check(Type.COLON)) {
+				this.advance()
+				let x = new Lexeme(Type.ID, a.getValue(), a.getLine(), a.car(), a.cdr())
+				return Lexeme.prototype.cons(Type.EXPLICIT, x, this.unary())
+			}
+			return Lexeme.prototype.cons(Type.IMPLICIT, a, null)
+		}
+		else
+			return this.implicitDef()
+	},
+
+	explicitDef: function() {
 		let a = this.match(Type.ID)
 		this.match(Type.COLON)
-		return Lexeme.prototype.cons(Type.COLON, a, this.unary())
+		return Lexeme.prototype.cons(Type.EXPLICIT, a, this.unary())
+	},
+
+	implicitDef: function() {
+		return Lexeme.prototype.cons(Type.IMPLICIT, this.unary(), null)
 	},
 
 	unary: function() {
 		if (this.check(Type.TRUE) ||
 			this.check(Type.FALSE) ||
-			this.check(Type.STRING))
+			this.check(Type.STRING) ||
+			this.check(Type.SKIP) ||
+			this.check(Type.URL))
 				return this.advance()
 		else if (this.numberPending())
 			return this.number()
+		else if (this.boolExprPending())
+			return this.boolExpr()
 		else if (this.objectPending())
 			return this.object()
 		else
@@ -301,12 +416,60 @@ Parser.prototype = {
 		return Lexeme.prototype.cons(Type.MINUS, null, this.match(Type.NUMBER))
 	},
 
+	boolExpr: function() {
+		let a, b
+		a = this.boolUnary()
+		if (this.boolOpPending()) {
+			b = this.boolOp()
+			return Lexeme.prototype.cons(b.getType(), a, this.boolUnary())
+		}
+		return a
+	},
+
+	boolUnary: function() {
+		if (this.check(Type.OPEN_PAREN)) {
+			this.advance()
+			let a = this.boolExpr()
+			this.match(Type.CLOSE_PAREN)
+			return Lexeme.prototype.cons(Type.OPEN_PAREN, null, a)
+		}
+		else if (this.intentPending())
+			return this.intent()
+		else if (this.entityPending())
+			return this.entity()
+		else
+			return this.context()
+	},
+
+	boolOp: function() {
+		if (this.check(Type.AND)) {
+			this.advance()
+			return this.match(Type.AND)
+		}
+		else {
+			this.advance()
+			return this.match(Type.OR)
+		}
+	},
+
+	intent: function() {
+		return this.match(Type.HASH)
+	},
+
+	entity: function() {
+		return this.match(Type.AT)
+	},
+
+	context: function() {
+		return this.match(Type.DOLLAR)
+	},
+
 	object: function() {
 		let a
 		this.match(Type.OPEN_BRACE)
 		a = this.optAttrList()
 		this.match(Type.CLOSE_BRACE)
-		return Lexeme.prototype.cons(Type.OBJECT, a, null)
+		return Lexeme.prototype.cons(Type.OPEN_BRACE, null, a)
 	},
 
 	optAttrList: function() {
@@ -318,30 +481,35 @@ Parser.prototype = {
 	attrList: function() {
 		let a, b
 		a = this.definition()
-		if (this.check(Type.COMMA)) {
+		if (this.check(Type.COMMA))
 			this.advance()
+		if (this.attrListPending())
 			b = this.attrList()
-		}
 		else
 			b = null
 		return Lexeme.prototype.cons(Type.ATTRIBUTE_LIST, a, b)
 	},
 
 	array: function() {
-		let a
 		this.match(Type.OPEN_BRACKET)
-		a = this.mixinList()
+		let a = this.optMixinList()
 		this.match(Type.CLOSE_BRACKET)
-		return a
+		return Lexeme.prototype.cons(Type.OPEN_BRACKET, null, a)
+	},
+
+	optMixinList: function() {
+		if (this.mixinListPending())
+			return this.mixinList()
+		return null
 	},
 
 	mixinList: function() {
 		let a, b
 		a = this.mixin()
-		if (this.check(Type.COMMA)) {
+		if (this.check(Type.COMMA))
 			this.advance()
+		if (this.mixinListPending())
 			b = this.mixinList()
-		}
 		else
 			b = null
 		return Lexeme.prototype.cons(Type.MIXIN_LIST, a, b)
@@ -355,12 +523,58 @@ Parser.prototype = {
 	},
 
 	definitionPending: function() {
-		return this.check(Type.ID)
+		return (this.check(Type.ID) ||
+				this.check(Type.STRING) ||
+				this.implicitDefPending())
+	},
+
+	implicitDefPending: function() {
+		return this.unaryPending()
+	},
+
+	unaryPending: function() {
+		return (this.check(Type.TRUE) || 
+				this.check(Type.FALSE) ||
+				this.check(Type.STRING) ||
+				this.check(Type.SKIP) ||
+				this.check(Type.URL) ||
+				this.numberPending() ||
+				this.boolExprPending() ||
+				this.objectPending() ||
+				this.arrayPending())
 	},
 
 	numberPending: function() {
 		return (this.nonNegNumPending() ||
 				this.negNumPending())
+	},
+
+	boolExprPending: function() {
+		return (this.check(Type.OPEN_PAREN) ||
+				this.boolUnaryPending())
+	},
+
+	boolOpPending: function() {
+		return (this.check(Type.AND) ||
+				this.check(Type.OR))
+	},
+
+	boolUnaryPending: function() {
+		return (this.intentPending() ||
+				this.entityPending() ||
+				this.contextPending())
+	},
+
+	intentPending: function() {
+		return this.check(Type.HASH)
+	},
+
+	entityPending: function() {
+		return this.check(Type.AT)
+	},
+
+	contextPending: function() {
+		return this.check(Type.DOLLAR)
 	},
 
 	nonNegNumPending: function() {
@@ -377,6 +591,19 @@ Parser.prototype = {
 
 	attrListPending: function() {
 		return this.definitionPending()
+	},
+
+	arrayPending: function() {
+		return this.check(Type.OPEN_BRACKET)
+	},
+
+	mixinListPending: function() {
+		return this.mixinPending()
+	},
+
+	mixinPending: function() {
+		return (this.definitionPending() ||
+				this.objectPending())
 	}
 
 }
@@ -387,10 +614,6 @@ var Pretty = function(outfile) {
 }
 
 Pretty.prototype = {
-
-	getBuffer: function() {
-		return this.buffer
-	},
 
 	printTabs: function() {
 		for (let i = 0; i < this.numTabs; i++)
@@ -409,6 +632,12 @@ Pretty.prototype = {
 			case Type.STRING:
 				fs.appendFileSync(this.outfile, "\"" + tree.getValue() + "\"")
 				break
+			case Type.SKIP:
+				fs.appendFileSync(this.outfile, "*")
+				break
+			case Type.URL:
+				fs.appendFileSync(this.outfile, "<" + tree.getValue() + ">")
+				break
 			case Type.NUMBER:
 				fs.appendFileSync(this.outfile, tree.getValue())
 				break
@@ -418,20 +647,44 @@ Pretty.prototype = {
 			case Type.PROGRAM:
 				this.printProgram(tree)
 				break
+			case Type.EXPLICIT:
+				this.printExplicit(tree)
+				break
+			case Type.IMPLICIT:
+				this.printImplicit(tree)
+				break
 			case Type.MINUS:
 				this.printMinus(tree)
 				break
-			case Type.COLON:
-				this.printAssign(tree)
+			case Type.OPEN_PAREN:
+				this.printBoolExpr(tree)
 				break
-			case Type.OBJECT:
+			case Type.HASH:
+				this.printIntent(tree)
+				break
+			case Type.AT:
+				this.printEntity(tree)
+				break
+			case Type.DOLLAR:
+				this.printContext(tree)
+				break
+			case Type.AND:
+				this.printAnd(tree)
+				break
+			case Type.OR:
+				this.printOr(tree)
+				break
+			case Type.OPEN_BRACE:
 				this.printObject(tree)
 				break
 			case Type.ATTRIBUTE_LIST:
 				this.printAttributeList(tree)
 				break
-			case Type.MIXIN_LIST:
+			case Type.OPEN_BRACKET:
 				this.printArray(tree)
+				break
+			case Type.MIXIN_LIST:
+				this.printMixinList(tree)
 				break
 			default:
 				throw Error('Could not discern type ' + tree.getType() + '!')
@@ -442,33 +695,67 @@ Pretty.prototype = {
 		fs.writeFileSync(this.outfile, '')
 		while (tree != null) {
 			this.printTabs()
-			this.pp(tree.getLeft())
-			tree = tree.getRight()
-			if (tree != null) {
-				fs.appendFileSync(this.outfile, ',')
-			}
+			this.pp(tree.car())
+			tree = tree.cdr()
 			fs.appendFileSync(this.outfile, '\n')
 		}
 		return this.buffer
 	},
 
-	printMinus: function(tree) {
-		fs.appendFileSync(this.outfile, '-')
-		this.pp(tree.getRight())
+	printExplicit: function(tree) {
+		this.pp(tree.car())
+		fs.appendFileSync(this.outfile, ": ")
+		this.pp(tree.cdr())
 	},
 
-	printAssign: function(tree) {
-		this.pp(tree.getLeft())
-		fs.appendFileSync(this.outfile, ": ")
-		this.pp(tree.getRight())
+	printImplicit: function(tree) {
+		this.pp(tree.car())
+	},
+
+	printMinus: function(tree) {
+		fs.appendFileSync(this.outfile, '-')
+		this.pp(tree.cdr())
+	},
+
+	printBoolExpr: function(tree) {
+		fs.appendFileSync(this.outfile, "(")
+		this.pp(tree.cdr())
+		fs.appendFileSync(this.outfile, ")")
+	},
+
+	printIntent: function(tree) {
+		fs.appendFileSync(this.outfile, "#")
+		fs.appendFileSync(this.outfile, tree.getValue())
+	},
+
+	printEntity: function(tree) {
+		fs.appendFileSync(this.outfile, "@")
+		fs.appendFileSync(this.outfile, tree.getValue())
+	},
+
+	printContext: function(tree) {
+		fs.appendFileSync(this.outfile, "$")
+		fs.appendFileSync(this.outfile, tree.getValue())
+	},
+
+	printAnd: function(tree) {
+		this.pp(tree.car())
+		fs.appendFileSync(this.outfile, " && ")
+		this.pp(tree.cdr())
+	},
+
+	printOr: function(tree) {
+		this.pp(tree.car())
+		fs.appendFileSync(this.outfile, " || ")
+		this.pp(tree.cdr())
 	},
 
 	printObject: function(tree) {
 		fs.appendFileSync(this.outfile, '{')
-		if (tree.getLeft() != null) {
+		if (tree.cdr() != null) {
 			fs.appendFileSync(this.outfile, '\n')
 			this.numTabs++
-			this.pp(tree.getLeft())
+			this.pp(tree.cdr())
 			this.numTabs--
 			this.printTabs()
 		}
@@ -478,30 +765,265 @@ Pretty.prototype = {
 	printAttributeList: function(tree) {
 		while (tree != null) {
 			this.printTabs()
-			this.pp(tree.getLeft())
-			tree = tree.getRight()
-			if (tree != null) {
-				fs.appendFileSync(this.outfile, ',')
-			}
+			this.pp(tree.car())
+			tree = tree.cdr()
 			fs.appendFileSync(this.outfile, '\n')
 		}
 	},
 
 	printArray: function(tree) {
-		fs.appendFileSync(this.outfile, "[\n")
-		this.numTabs++
+		fs.appendFileSync(this.outfile, "[")
+		if (tree.cdr() != null) {
+			fs.appendFileSync(this.outfile, "\n")
+			this.numTabs++
+			this.pp(tree.cdr())
+			this.numTabs--
+			this.printTabs()
+		}
+		fs.appendFileSync(this.outfile, "]")
+	},
+
+	printMixinList: function(tree) {
 		while (tree != null) {
 			this.printTabs()
-			this.pp(tree.getLeft())
-			tree = tree.getRight()
-			if (tree != null) {
-				fs.appendFileSync(this.outfile, ',')
-			}
+			this.pp(tree.car())
+			tree = tree.cdr()
+			fs.appendFileSync(this.outfile, "\n")
+		}
+	}
+
+}
+
+var Translator = function(outfile) {
+	this.outfile = outfile
+	this.numTabs = 0
+	this.inObject = false
+	this.inExpr = false
+}
+
+Translator.prototype = {
+
+	printTabs: function() {
+		for (let i = 0; i < this.numTabs; i++)
+			fs.appendFileSync(this.outfile, '\t')
+	},
+
+	translate: function(tree) {
+		if (tree == null) return
+		switch(tree.getType()) {
+			case Type.TRUE:
+				fs.appendFileSync(this.outfile, 'true')
+				break
+			case Type.FALSE:
+				fs.appendFileSync(this.outfile, 'false')
+				break
+			case Type.STRING:
+				fs.appendFileSync(this.outfile, '"' + tree.getValue() + '"')
+				break
+			case Type.SKIP:
+				break
+			case Type.URL:
+				fs.appendFileSync(this.outfile, '"' + tree.getValue() + '"')
+				break
+			case Type.NUMBER:
+				fs.appendFileSync(this.outfile, tree.getValue())
+				break
+			case Type.ID:
+				fs.appendFileSync(this.outfile, tree.getValue())
+				break
+			case Type.PROGRAM:
+				this.translateProgram(tree)
+				break
+			case Type.EXPLICIT:
+				this.translateExplicit(tree)
+				break
+			case Type.IMPLICIT:
+				this.translateImplicit(tree)
+				break
+			case Type.MINUS:
+				this.translateMinus(tree)
+				break
+			case Type.OPEN_PAREN:
+				this.translateBoolExpr(tree)
+				break
+			case Type.HASH:
+				this.translateIntent(tree)
+				break
+			case Type.AT:
+				this.translateEntity(tree)
+				break
+			case Type.DOLLAR:
+				this.translateContext(tree)
+				break
+			case Type.AND:
+				this.translateAnd(tree)
+				break
+			case Type.OR:
+				this.translateOr(tree)
+				break
+			case Type.OPEN_BRACE:
+				this.translateObject(tree)
+				break
+			case Type.ATTRIBUTE_LIST:
+				this.translateAttributeList(tree)
+				break
+			case Type.OPEN_BRACKET:
+				this.translateArray(tree)
+				break
+			case Type.MIXIN_LIST:
+				this.translateMixinList(tree)
+				break
+			default:
+				throw Error('Error translating type ' + tree.getType() + '!')
+		}
+	},
+
+	translateProgram: function(tree) {
+		fs.writeFileSync(this.outfile, '')
+		while (tree != null) {
+			this.printTabs()
+			this.translate(tree.car())
+			tree = tree.cdr()
 			fs.appendFileSync(this.outfile, '\n')
 		}
-		this.numTabs--
-		this.printTabs()
+	},
+
+	translateExplicit: function(tree) {
+		this.translate(tree.car())
+		if (this.inObject)
+			fs.appendFileSync(this.outfile, ': ')
+		else
+			fs.appendFileSync(this.outfile, ' = ')
+		this.translate(tree.cdr())
+		this.inExpr = false
+	},
+
+	translateImplicit: function(tree) {
+		this.translate(tree.car())
+	},
+
+	translateMinus: function(tree) {
+		fs.appendFileSync(this.outfile, '-')
+		this.translate(tree.cdr())
+	},
+
+	translateBoolExpr: function(tree) {
+		if (this.inExpr == false) {
+			fs.appendFileSync(this.outfile, '"(')
+			this.inExpr = true
+			this.translate(tree.cdr())
+			this.inExpr = false
+			fs.appendFileSync(this.outfile, ')"')
+		}
+		else {
+			fs.appendFileSync(this.outfile, '(')
+			this.translate(tree.cdr())
+			fs.appendFileSync(this.outfile, ')')
+		}
+	},
+
+	translateIntent: function(tree) {
+		if (this.inExpr == false)
+			fs.appendFileSync(this.outfile, '"#' + tree.getValue() + '"')
+		else
+			fs.appendFileSync(this.outfile, '#' + tree.getValue())
+	},
+
+	translateEntity: function(tree) {
+		if (this.inExpr == false)
+			fs.appendFileSync(this.outfile, '"@' + tree.getValue() + '"')
+		else
+			fs.appendFileSync(this.outfile, '@' + tree.getValue())
+	},
+
+	translateContext: function(tree) {
+		if (this.inExpr == false)
+			fs.appendFileSync(this.outfile, '"$' + tree.getValue() + '"')
+		else
+			fs.appendFileSync(this.outfile, '$' + tree.getValue())
+	},
+
+	translateAnd: function(tree) {
+		if (this.inExpr == false) {
+			fs.appendFileSync(this.outfile, '"')
+			this.inExpr = true
+			this.translate(tree.car())
+			fs.appendFileSync(this.outfile, ' && ')
+			this.translate(tree.cdr())
+			this.inExpr = false
+			fs.appendFileSync(this.outfile, '"')
+
+		}
+		else {
+			this.translate(tree.car())
+			fs.appendFileSync(this.outfile, ' && ')
+			this.translate(tree.cdr())
+		}
+	},
+
+	translateOr: function(tree) {
+		if (this.inExpr == false) {
+			fs.appendFileSync(this.outfile, '"')
+			this.inExpr = true
+			this.translate(tree.car())
+			fs.appendFileSync(this.outfile, ' || ')
+			this.translate(tree.cdr())
+			this.inExpr = false
+			fs.appendFileSync(this.outfile, '"')
+		}
+		else {
+			this.translate(tree.car())
+			fs.appendFileSync(this.outfile, ' || ')
+			this.translate(tree.cdr())
+		}
+	},
+
+	translateObject: function(tree) {
+		fs.appendFileSync(this.outfile, '{')
+		if (tree.cdr() != null) {
+			fs.appendFileSync(this.outfile, '\n')
+			this.numTabs++
+			this.translate(tree.cdr())
+			this.numTabs--
+			this.printTabs()
+		}
+		fs.appendFileSync(this.outfile, '}')
+	},
+
+	translateAttributeList: function(tree) {
+		while (tree != null) {
+			this.inObject = 1
+			this.printTabs()
+			this.translate(tree.car())
+			tree = tree.cdr()
+			if (tree != null)
+				fs.appendFileSync(this.outfile, ',')
+			fs.appendFileSync(this.outfile, '\n')
+		}
+		this.inObject = 0
+	},
+
+	translateArray: function(tree) {
+		fs.appendFileSync(this.outfile, '[')
+		if (tree.cdr() != null) {
+			fs.appendFileSync(this.outfile, '\n')
+			this.numTabs++
+			this.translate(tree.cdr())
+			this.numTabs--
+			this.printTabs()
+		}
 		fs.appendFileSync(this.outfile, ']')
+	},
+
+	translateMixinList: function(tree) {
+		while (tree != null) {
+			this.printTabs()
+			this.translate(tree.car())
+			tree = tree.cdr()
+			if (tree != null)
+				fs.appendFileSync(this.outfile, ',')
+			fs.appendFileSync(this.outfile, '\n')
+		}
 	}
 
 }
@@ -513,23 +1035,23 @@ var Environment = function() {
 Environment.prototype = {
 
 	insert: function(env, variable, value) {
-		let table = env.getLeft()
-		table.setLeft(Lexeme.prototype.cons(Type.ID_LIST, variable, table.getLeft()))
-		table.setRight(Lexeme.prototype.cons(Type.VALUE_LIST, value, table.getRight()))
+		let table = env.car()
+		table.setCar(Lexeme.prototype.cons(Type.ID_LIST, variable, table.car()))
+		table.setCdr(Lexeme.prototype.cons(Type.VALUE_LIST, value, table.cdr()))
 	},
 
 	lookup: function(env, variable) {
 		while (env != null) {
-			let table = env.getLeft()
-			let vars = table.getLeft()
-			let vals = table.getRight()
+			let table = env.car()
+			let vars = table.car()
+			let vals = table.cdr()
 			while (vars != null) {
-				if (this.sameVariable(vars.getLeft(), variable))
-					return vals.getLeft()
-				vars = vars.getRight()
-				vals = vals.getRight()
+				if (this.sameVariable(vars.car(), variable))
+					return vals.car()
+				vars = vars.cdr()
+				vals = vals.cdr()
 			}
-			env = env.getRight()
+			env = env.cdr()
 		}
 		throw Error('Could not find ', variable.getValue(), ' within scope!')
 	},
@@ -540,100 +1062,100 @@ Environment.prototype = {
 
 	exists: function(env, variable) {
 		while (env != null) {
-			let table = env.getLeft()
-			let vars = table.getLeft()
-			let vals = table.getRight()
+			let table = env.car()
+			let vars = table.car()
+			let vals = table.cdr()
 			while (vars != null) {
-				if (this.sameVariable(vars.getLeft(), variable))
+				if (this.sameVariable(vars.car(), variable))
 					return true
-				vars = vars.getRight()
-				vals = vals.getRight()
+				vars = vars.cdr()
+				vals = vals.cdr()
 			}
-			env = env.getRight()
+			env = env.cdr()
 		}
 		return false
 	},
 
 	lookupLocal: function(env, variable) {
-		let table = env.getLeft()
-		let vars = table.getLeft()
-		let vals = table.getRight()
+		let table = env.car()
+		let vars = table.car()
+		let vals = table.cdr()
 		while (vars != null) {
-			if (this.sameVariable(vars.getLeft(), variable))
-				return vals.getLeft()
-			vars = vars.getRight()
-			vals = vals.getRight()
+			if (this.sameVariable(vars.car(), variable))
+				return vals.car()
+			vars = vars.cdr()
+			vals = vals.cdr()
 		}
 		throw Error('Could not find ', variable.getValue(), ' in the environment!')
 	},
 
 	existsLocal: function(env, variable) {
-		let table = env.getLeft()
-		let vars = table.getLeft()
-		let vals = table.getRight()
+		let table = env.car()
+		let vars = table.car()
+		let vals = table.cdr()
 		while (vars != null) {
-			if (this.sameVariable(vars.getLeft(), variable))
+			if (this.sameVariable(vars.car(), variable))
 				return true
-			vars = vars.getRight()
-			vals = vals.getRight()
+			vars = vars.cdr()
+			vals = vals.cdr()
 		}
 		return false
 	},
 
 	update: function(env, variable, value) {
 		while (env != null) {
-			let table = env.getLeft()
-			let vars = table.getLeft()
-			let vals = table.getRight()
+			let table = env.car()
+			let vars = table.car()
+			let vals = table.cdr()
 			while (vars != null) {
-				if (this.sameVariable(vars.getLeft(), variable))
-					return vals.setLeft(value)
-				vars = vars.getRight()
-				vals = vals.getRight()
+				if (this.sameVariable(vars.car(), variable))
+					return vals.setCar(value)
+				vars = vars.cdr()
+				vals = vals.cdr()
 			}
-			env = env.getRight()
+			env = env.cdr()
 		}
 		throw Error('Error updating ', variable.getValue(), ': Could not find variable within scope!')
 	},
 
 	deleteHelper: function(vars, vals, table) {
 		if (vars == null) {
-			let retVar = table.getLeft()
-			let retVal = table.getRight()
-			table.setLeft(retVar.getRight())
-			table.setRight(retVal.getRight())
+			let retVar = table.car()
+			let retVal = table.cdr()
+			table.setCar(retVar.cdr())
+			table.setCdr(retVal.cdr())
 
-			retVar.setRight(null)
-			retVal.setRight(null)
+			retVar.setCdr(null)
+			retVal.setCdr(null)
 
-			return retVal.getLeft()
+			return retVal.car()
 		}
 
-		let retVar = vars.getRight()
-		let retVal = vals.getRight()
+		let retVar = vars.cdr()
+		let retVal = vals.cdr()
 
-		vars.setRight(retVar.getRight())
-		vals.setRight(retVal.getRight())
+		vars.setCdr(retVar.cdr())
+		vals.setCdr(retVal.cdr())
 
-		return retVal.getLeft()
+		return retVal.car()
 	},
 
 	delete: function(env, variable) {
 		while (env != null) {
-			let table = env.getLeft()
-			let vars = table.getLeft()
-			let vals = table.getRight()
+			let table = env.car()
+			let vars = table.car()
+			let vals = table.cdr()
 			let prevVar = null
 			let prevVal = null
 			while (vars != null) {
-				if (this.sameVariable(vars.getLeft(), variable))
+				if (this.sameVariable(vars.car(), variable))
 					return deleteHelper(prevVar, prevVal, table)
 				prevVar = vars
 				prevVal = vals
-				vars = vars.getRight()
-				vals = vals.getRight()
+				vars = vars.cdr()
+				vals = vals.cdr()
 			}
-			env = env.getRight()
+			env = env.cdr()
 		}
 		throw Error('Error deleting ', variable.getValue(), ': Could not find variable within scope!')
 	},
@@ -644,18 +1166,18 @@ Environment.prototype = {
 
 	displayEnvironment: function(env) {
 		if (env == null) return
-		let table = env.getLeft()
-		let vars = table.getLeft()
-		let vals = table.getRight()
+		let table = env.car()
+		let vars = table.car()
+		let vals = table.cdr()
 		console.log('The local environment is. . .')
 		if (vars == null) {
 			console.log('EMPTY!')
 		}
 		while (vars != null) {
-			process.stdout.write("var " + vars.getLeft().getValue() + " = ")
-			vals.getLeft().displayLexeme()
-			vars = vars.getRight()
-			vals = vals.getRight()
+			process.stdout.write("var " + vars.car().getValue() + " = ")
+			vals.car().displayLexeme()
+			vars = vars.cdr()
+			vals = vals.cdr()
 		}
 		console.log('-------------------------------------------------')
 	},
@@ -664,7 +1186,7 @@ Environment.prototype = {
 		console.log('--------The environments within scope are--------')
 		while (env != null) {
 			this.displayEnvironment(env)
-			env = env.getRight()
+			env = env.cdr()
 		}
 	}
 
@@ -710,34 +1232,34 @@ Evaluator.prototype = {
 	evalProgram: function(tree, env) {
 		let ret = null
 		while (tree != null) {
-			ret = this.eval(tree.getLeft(), env)
-			tree = tree.getRight()
+			ret = this.eval(tree.car(), env)
+			tree = tree.cdr()
 		}
 		return ret
 	},
 
 	evalMinus: function(tree, env) {
-		let num = this.eval(tree.getRight(), env)
+		let num = this.eval(tree.cdr(), env)
 		return new Lexeme(Type.NUMBER, -1 * num, undefined, undefined, undefined)
 	},
 
 	evalAssign: function(tree, env) {
-		let id = tree.getLeft()
-		let result = this.eval(tree.getRight(), env)
+		let id = tree.car()
+		let result = this.eval(tree.cdr(), env)
 		return Environment.prototype.insert(env, id, result)
 	},
 
 	evalObject: function(tree, env) {
 		let xenv = Environment.prototype.extend(env, null, null)
-		this.eval(tree.getLeft(), xenv)
+		this.eval(tree.car(), xenv)
 		return xenv
 	},
 
 	evalAttributeList: function(list, env) {
 		let ret = null
 		while (list != null) {
-			ret = this.eval(list.getLeft(), env)
-			list = list.getRight()
+			ret = this.eval(list.car(), env)
+			list = list.cdr()
 		}
 		return ret
 	},
@@ -746,13 +1268,13 @@ Evaluator.prototype = {
 		let temp = list
 		let count = 0
 		while (temp != null) {
-			temp = temp.getRight()
+			temp = temp.cdr()
 			count++
 		}
 		let arr = []
 		while (list != null) {
-			arr.push(this.eval(list.getLeft(), env))
-			list = list.getRight()
+			arr.push(this.eval(list.car(), env))
+			list = list.cdr()
 		}
 		return new Lexeme(Type.ARRAY, arr, undefined, undefined, undefined)
 	}

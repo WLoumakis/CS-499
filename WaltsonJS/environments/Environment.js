@@ -615,23 +615,23 @@ var Environment = function() {
 Environment.prototype = {
 
 	insert: function(env, variable, value) {
-		let table = env.getLeft()
-		table.setLeft(Lexeme.prototype.cons(Type.ID_LIST, variable, table.getLeft()))
-		table.setRight(Lexeme.prototype.cons(Type.VALUE_LIST, value, table.getRight()))
+		let table = env.car()
+		table.setCar(Lexeme.prototype.cons(Type.ID_LIST, variable, table.car()))
+		table.setCdr(Lexeme.prototype.cons(Type.VALUE_LIST, value, table.cdr()))
 	},
 
 	lookup: function(env, variable) {
 		while (env != null) {
-			let table = env.getLeft()
-			let vars = table.getLeft()
-			let vals = table.getRight()
+			let table = env.car()
+			let vars = table.car()
+			let vals = table.cdr()
 			while (vars != null) {
-				if (this.sameVariable(vars.getLeft(), variable))
-					return vals.getLeft()
-				vars = vars.getRight()
-				vals = vals.getRight()
+				if (this.sameVariable(vars.car(), variable))
+					return vals.car()
+				vars = vars.cdr()
+				vals = vals.cdr()
 			}
-			env = env.getRight()
+			env = env.cdr()
 		}
 		throw Error('Could not find ', variable.getValue(), ' within scope!')
 	},
@@ -642,100 +642,100 @@ Environment.prototype = {
 
 	exists: function(env, variable) {
 		while (env != null) {
-			let table = env.getLeft()
-			let vars = table.getLeft()
-			let vals = table.getRight()
+			let table = env.car()
+			let vars = table.car()
+			let vals = table.cdr()
 			while (vars != null) {
-				if (this.sameVariable(vars.getLeft(), variable))
+				if (this.sameVariable(vars.car(), variable))
 					return true
-				vars = vars.getRight()
-				vals = vals.getRight()
+				vars = vars.cdr()
+				vals = vals.cdr()
 			}
-			env = env.getRight()
+			env = env.cdr()
 		}
 		return false
 	},
 
 	lookupLocal: function(env, variable) {
-		let table = env.getLeft()
-		let vars = table.getLeft()
-		let vals = table.getRight()
+		let table = env.car()
+		let vars = table.car()
+		let vals = table.cdr()
 		while (vars != null) {
-			if (this.sameVariable(vars.getLeft(), variable))
-				return vals.getLeft()
-			vars = vars.getRight()
-			vals = vals.getRight()
+			if (this.sameVariable(vars.car(), variable))
+				return vals.car()
+			vars = vars.cdr()
+			vals = vals.cdr()
 		}
 		throw Error('Could not find ', variable.getValue(), ' in the environment!')
 	},
 
 	existsLocal: function(env, variable) {
-		let table = env.getLeft()
-		let vars = table.getLeft()
-		let vals = table.getRight()
+		let table = env.car()
+		let vars = table.car()
+		let vals = table.cdr()
 		while (vars != null) {
-			if (this.sameVariable(vars.getLeft(), variable))
+			if (this.sameVariable(vars.car(), variable))
 				return true
-			vars = vars.getRight()
-			vals = vals.getRight()
+			vars = vars.cdr()
+			vals = vals.cdr()
 		}
 		return false
 	},
 
 	update: function(env, variable, value) {
 		while (env != null) {
-			let table = env.getLeft()
-			let vars = table.getLeft()
-			let vals = table.getRight()
+			let table = env.car()
+			let vars = table.car()
+			let vals = table.cdr()
 			while (vars != null) {
-				if (this.sameVariable(vars.getLeft(), variable))
-					return vals.setLeft(value)
-				vars = vars.getRight()
-				vals = vals.getRight()
+				if (this.sameVariable(vars.car(), variable))
+					return vals.setCar(value)
+				vars = vars.cdr()
+				vals = vals.cdr()
 			}
-			env = env.getRight()
+			env = env.cdr()
 		}
 		throw Error('Error updating ', variable.getValue(), ': Could not find variable within scope!')
 	},
 
 	deleteHelper: function(vars, vals, table) {
 		if (vars == null) {
-			let retVar = table.getLeft()
-			let retVal = table.getRight()
-			table.setLeft(retVar.getRight())
-			table.setRight(retVal.getRight())
+			let retVar = table.car()
+			let retVal = table.cdr()
+			table.setCar(retVar.cdr())
+			table.setCdr(retVal.cdr())
 
-			retVar.setRight(null)
-			retVal.setRight(null)
+			retVar.setCdr(null)
+			retVal.setCdr(null)
 
-			return retVal.getLeft()
+			return retVal.car()
 		}
 
-		let retVar = vars.getRight()
-		let retVal = vals.getRight()
+		let retVar = vars.cdr()
+		let retVal = vals.cdr()
 
-		vars.setRight(retVar.getRight())
-		vals.setRight(retVal.getRight())
+		vars.setCdr(retVar.cdr())
+		vals.setCdr(retVal.cdr())
 
-		return retVal.getLeft()
+		return retVal.car()
 	},
 
 	delete: function(env, variable) {
 		while (env != null) {
-			let table = env.getLeft()
-			let vars = table.getLeft()
-			let vals = table.getRight()
+			let table = env.car()
+			let vars = table.car()
+			let vals = table.cdr()
 			let prevVar = null
 			let prevVal = null
 			while (vars != null) {
-				if (this.sameVariable(vars.getLeft(), variable))
+				if (this.sameVariable(vars.car(), variable))
 					return deleteHelper(prevVar, prevVal, table)
 				prevVar = vars
 				prevVal = vals
-				vars = vars.getRight()
-				vals = vals.getRight()
+				vars = vars.cdr()
+				vals = vals.cdr()
 			}
-			env = env.getRight()
+			env = env.cdr()
 		}
 		throw Error('Error deleting ', variable.getValue(), ': Could not find variable within scope!')
 	},
@@ -746,18 +746,18 @@ Environment.prototype = {
 
 	displayEnvironment: function(env) {
 		if (env == null) return
-		let table = env.getLeft()
-		let vars = table.getLeft()
-		let vals = table.getRight()
+		let table = env.car()
+		let vars = table.car()
+		let vals = table.cdr()
 		console.log('The local environment is. . .')
 		if (vars == null) {
 			console.log('EMPTY!')
 		}
 		while (vars != null) {
-			process.stdout.write("var " + vars.getLeft().getValue() + " = ")
-			vals.getLeft().displayLexeme()
-			vars = vars.getRight()
-			vals = vals.getRight()
+			process.stdout.write("var " + vars.car().getValue() + " = ")
+			vals.car().displayLexeme()
+			vars = vars.cdr()
+			vals = vals.cdr()
 		}
 		console.log('-------------------------------------------------')
 	},
@@ -766,7 +766,7 @@ Environment.prototype = {
 		console.log('--------The environments within scope are--------')
 		while (env != null) {
 			this.displayEnvironment(env)
-			env = env.getRight()
+			env = env.cdr()
 		}
 	}
 }
