@@ -41,11 +41,14 @@ negNum		:	UMINUS INTEGER
 
 boolExpr	:	boolUnary
 			|	boolUnary boolOp boolExpr
-			|	OPAREN boolExpr CPAREN
+
+optExpr		:	boolOp boolExpr
+			|	*EMPTY*
 
 boolUnary	:	intent
 			|	entity
 			|	context
+			|	OPAREN boolExpr CPAREN
 
 boolOp		:	AND
 			|	OR
