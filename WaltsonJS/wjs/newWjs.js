@@ -1190,6 +1190,18 @@ Environment.prototype = {
 		throw Error('Error updating ', variable.getValue(), ': Could not find variable within scope!')
 	},
 
+	updateLocalSpecific: function(env, variable, value) {
+		let table = env.car()
+		let vars = table.car()
+		let vals = table.cdr()
+		while (vars != null) {
+			if (vars.car() == variable)
+				return vals.setCar(value)
+			vars = vars.cdr()
+			vals = vals.cdr()
+		}
+	},
+
 	deleteHelper: function(vars, vals, table) {
 		if (vars == null) {
 			let retVar = table.car()
@@ -1485,7 +1497,8 @@ wjs.prototype = {
 	},
 
 	flatten: function(tree) {
-		Environment.prototype.insert(this.global, tree.car(), tree.cdr())
+		//Environment.prototype.insert(this.global, tree.car(), tree.cdr())
+		Environment.prototype.updateLocalSpecific(this.global, tree.car(), tree.cdr())
 	},
 
 }
