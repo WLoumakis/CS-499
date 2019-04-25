@@ -22,14 +22,16 @@ function changeExtension(str) {
 }
 
 function warn(outfile) {
-	process.stderr.write('WARNING: file ' + outfile + ' already exists and will be overwritten.\n')
+	console.error('WARNING: file ' + outfile + ' already exists and will be overwritten.')
 	let result = rl.question('Do you wish to continue? [y/n]: ')
 	if (result.toLowerCase() == 'y')
 		return true
 	else if (result.toLowerCase() == 'n')
 		return false
-	else
+	else {
+		console.error('Error: token ' + result + ' not understood!')
 		return warn(outfile)
+	}
 }
 
 function enqueueHelper(node) {
@@ -106,6 +108,7 @@ function translate(infile, outfile) {
 	let nodes = null
 	if (Environment.prototype.exists(global, dialog_nodes))
 		nodes = Environment.prototype.lookup(global, dialog_nodes).getValue()
+	
 	
 	if (nodes != null)
 		nodes = enqueue(nodes)
