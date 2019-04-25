@@ -1393,7 +1393,100 @@ var wjs = function(outfile, global) {
 
 wjs.prototype = {
 
-	
+	checkGlobal: function() {
+		let workspace_id = new Lexeme(Type.ID, 'workspace_id', undefined, undefined, undefined)
+		this.createWorkspace = Environment.prototype.exists(this.global, workspace_id)
+		this.intents = checkIntents(this.global)
+		this.entities = checkEntities(this.global)
+		this.dialog_nodes = checkDialogNodes(this.global)
+		this.counterexamples = checkCounterexamples(this.global)
+	},
+
+	checkIntents: function(env) {
+		let intents = new Lexeme(Type.ID, "intents", undefined, undefined, undefined)
+		return Environment.prototype.existsLocal(env, intents)
+	},
+
+	checkEntities: function(env) {
+		let entities = new Lexeme(Type.ID, "entities", undefined, undefined, undefined)
+		return Environment.prototype.existsLocal(env, entities)
+	},
+
+	checkDialogNodes: function(env) {
+		let dialog_nodes = new Lexeme(Type.ID, "dialog_nodes", undefined, undefined, undefined)
+		return Environment.prototype.existsLocal(env, dialog_nodes)
+	},
+
+	checkCounterexamples: function(env) {
+		let counterexamples = new Lexeme(Type.ID, "counterexamples", undefined, undefined, undefined)
+		return Environment.prototype.existsLocal(env, counterexamples)
+	},
+
+	checkOneAboveGlobal: function() {
+		let valid = []
+		let table = this.global.car()
+		let vars = table.car()
+		let vals = table.cdr()
+		while (vals != null) {
+			if (vals.car().getType() == Type.ENVIRONMENT)
+				valid.push(Lexeme.prototype.cons(Type.GLUE, vars.car(), vals.car()))
+			vars = vars.cdr()
+			vals = vals.cdr()
+		}
+		for (let i = 0; i < valid.length; i++) {
+			if (this.intents == false && this.checkIntents(valid[i].cdr())) {
+				this.flatten(valid[i])
+			}
+			if (this.entities == false && this.checkEntities(valid[i].cdr())) {
+				this.flatten(valid[i])
+			}
+			if (this.dialog_nodes == false && this.checkDialogNodes(valid[i].cdr())) {
+				this.flatten(valid[i])
+			}
+			if (this.counterexamples == false && this.checkCounterexamples(valid[i].cdr())) {
+				this.flatten(valid[i])
+			}
+		}
+	},
+
+	checkAndSetImplicitGlobalVars: function() {
+		let table = this.global.car()
+		let vars = table.car()
+		let vals = table.cdr()
+		let watson_attr = 0
+		while (vars != null) {
+			if (vars.car().getValue() == "unbound" &&
+			   	(vals.car().getType() == Type.SKIP ||
+				vals.car().getType() == Type.ARRAY)) {
+					switch (watson_attr) {
+						case 0:
+							vars.car().setValue('intents')
+							watson_attr++
+							break
+						case 1:
+							vars.car().setValue('entities')
+							watson_attr++
+							break
+						case 2:
+							vars.car().setValue('dialog_nodes')
+							watson_attr++
+							break
+						case 3:
+							vars.car().setValue('counterexamples')
+							watson_attr++
+							break
+						default:
+							throw Error("Couldn't understand more than 4 implicit definitions!")
+					}
+					if (vals.car().getType() == Type.SKIP)
+						vals.setCar(new Lexeme(Type.ARRAY, [], undefined, undefined, undefined))
+			}
+		}
+	},
+
+	flatten: function(tree) {
+		Environment.prototype.insert(this.global, tree.car(), tree.cdr())
+	},
 
 }
 

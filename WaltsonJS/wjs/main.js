@@ -109,7 +109,6 @@ function translate(infile, outfile) {
 	if (Environment.prototype.exists(global, dialog_nodes))
 		nodes = Environment.prototype.lookup(global, dialog_nodes).getValue()
 	
-	
 	if (nodes != null)
 		nodes = enqueue(nodes)
 	
