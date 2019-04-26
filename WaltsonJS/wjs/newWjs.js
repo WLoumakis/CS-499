@@ -1457,12 +1457,19 @@ WJS.prototype = {
 	},
 
 	performChecksAndSets: function() {
+		console.log('before checkAndSetGlobal()')
 		this.checkAndSetGlobal()
+		console.log('after checkAndSetGlobal')
 		if (this.anyParamMissing()) {
+			console.log('before checkAndSetImplicitGlobalVars()')
 			this.checkAndSetImplicitGlobalVars()
+			console.log('after checkAndSetImplicitGlobalVars()')
 		}
+		console.log('after chceking for paramMissing and doing checkAndSetImplicitGlobalVars()')
 		if (this.anyParamMissing()) {
+			console.log('before checkOneAboveGlobal()')
 			this.checkOneAboveGlobal()
+			console.log('after checkOneAboveGlobal()')
 		}
 	},
 
@@ -1582,6 +1589,9 @@ WJS.prototype = {
 					if (vals.car().getType() == Type.SKIP)
 						vals.setCar(new Lexeme(Type.ARRAY, [], undefined, undefined, undefined))
 			}
+
+			vars = vars.cdr()
+			vals = vals.cdr()
 		}
 	},
 
