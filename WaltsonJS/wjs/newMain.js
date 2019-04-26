@@ -193,35 +193,42 @@ function enqueueHelper(env) {
 
 	if (Environment.prototype.existsLocal(env, children))
 		children_val = Environment.prototype.lookupLocal(env, children)
-	
+
 	let table = env.car()
 	let vars = table.car()
 	let vals = table.cdr()
+
 	while (vars != null) {
+
 		// If we have an implicit definition, it is expected to be output or children.
 		if (vars.car().getValue() == 'unbound') {
+
 			setImplicitNodeAttribute(vars.car(), vals.car())
 
 			// If we are inserting something other than children, it is expected to be output.
 			if (vals.car().getType() != Type.ENVIRONMENT ||
 					(vals.car().getType() == Type.ENVIRONMENT &&
 					vals.car().getValue() != Type.ARRAY)) {
+
 						// Check to see if the output attribute is already in the environment
 						if (!Environment.prototype.existsLocal(node, out))
 							Environment.prototype.insert(node, out, output)
-						
+
 						// Insert the new value into the output object
 						Environment.prototype.insert(output, vars.car(), vals.car())
+
 			}
 			// Otherwise just insert the attribute
 			else
 				Environment.prototype.insert(node, vars.car(), vals.car())
+
 		}
+		vars = vars.cdr()
+		vals = vals.cdr()
 	}
 
 	let result = []
 	if (children_val != null) {
-		console.log('children_val not null!')
 		let table = children_val.car()
 		let vars = table.car()
 		let vals = table.cdr()
@@ -231,7 +238,7 @@ function enqueueHelper(env) {
 			if (vals.car().getType() == Type.ENVIRONMENT && vals.car().getValue() == Type.OBJECT) {
 
 				// If parent doesn't exist in the child, insert it
-				if (Environment.prototype.existsLocal(vals.car(), parent))
+				if (!Environment.prototype.existsLocal(vals.car(), parent))
 					Environment.prototype.insert(vals.car(), parent, parent_val)
 
 				// If previous_sibling doesn't exist in the environment, insert it
@@ -243,7 +250,7 @@ function enqueueHelper(env) {
 
 				for (let i = 0; i < arrayOfChildren.length; i++)
 					result.push(arrayOfChildren[i])
-				ps = Environment.prototype.lookupLocal(vals.car(), dialog_node)
+				previous_sibling_val = Environment.prototype.lookupLocal(vals.car(), dialog_node)
 			}
 
 			// Otherwise, we have implicit definitions of nodes,
@@ -328,6 +335,7 @@ function enqueueHelper(env) {
 			vars = vars.cdr()
 			vals = vals.cdr()
 		}
+		Environment.prototype.delete(env, children)
 	}
 	return result	
 }
@@ -343,16 +351,23 @@ function enqueue(env) {
 	let table = env.car()
 	let vars = table.car()
 	let vals = table.cdr()
+
 	while (vars != null) {
+		
 		// If we have an object, then it is expected to be a node object.
 		if (vals.car().getType() == Type.ENVIRONMENT && vals.car().getValue() == Type.OBJECT) {
+
 			if (vars != table.car())
 				Environment.prototype.insert(vals.car(), previous_sibling, previous_sibling_val)
+
 			result.push(vals.car())
+
 			let arrayOfChildren = enqueueHelper(vals.car())
+
 			for (let i = 0; i < arrayOfChildren.length; i++)
 				result.push(arrayOfChildren[i])
-			ps = Environment.prototype.lookupLocal(vals.car(), dialog_node)
+
+			previous_sibling_val = Environment.prototype.lookupLocal(vals.car(), dialog_node)
 		}
 
 		// Otherwise, we have implicit definitions of nodes,
@@ -365,45 +380,51 @@ function enqueue(env) {
 			let name = vals.car()
 
 			let out = new Lexeme(Type.ID, 'output', undefined, undefined, undefined)
+
 			let output = buildOutputSkeleton()
 
 			// Insert the most important attributes
 			Environment.prototype.insert(node, title, name)
 			Environment.prototype.insert(node, dialog_node, name)
 
-			// Keep up with the last var and val
-			let last_vars = vars
-			let last_vals = vals
 
 			// Skip to the next attribute
 			vars = vars.cdr()
 			vals = vals.cdr()
 
+
 			// Iterate until we hit the next implicit node
 			while (vars != null && vars.car().getValue() != 'name') {
 
+
 				// If we have an implicit definition, it is expected to be output or children.
 				if (vars.car().getValue() == 'unbound') {
+
 					setImplicitNodeAttribute(vars.car(), vals.car())
+
 
 					// If we aren't inserting children. . .
 					if (vals.car().getType() != Type.ENVIRONMENT ||
 							(vals.car().getType() == Type.ENVIRONMENT &&
 							vals.car().getValue() != Type.ARRAY)) {
+
 								// Check to see if the output attribute is already in the environment
 								if (!Environment.prototype.existsLocal(node, out))
 									Environment.prototype.insert(node, out, output)
-								
+
 								// Insert the new value into the output object
 								Environment.prototype.insert(output, vars.car(), vals.car())
+
 					}
 					// Otherwise just insert the attribute
 					else
 						Environment.prototype.insert(node, vars.car(), vals.car())
+
 				}
 
 				// Otherwise, it's an explicit definition and can be inserted.
 				else {
+
 					// If the attribute already exists, simply update it.
 					if (Environment.prototype.existsLocal(node, vars.car()))
 						Environment.prototype.update(node, vars.car(), vals.car())
@@ -411,10 +432,9 @@ function enqueue(env) {
 					// Otherwise, just insert.
 					else
 						Environment.prototype.insert(node, vars.car(), vals.car())
+
 				}
 
-				last_vars = vars
-				last_vals = vals
 				vars = vars.cdr()
 				vals = vals.cdr()
 			}
@@ -424,7 +444,9 @@ function enqueue(env) {
 				Environment.prototype.insert(node, previous_sibling, previous_sibling_val)
 
 			result.push(node)
+
 			let arrayOfChildren = enqueueHelper(node)
+
 			for (let i = 0; i < arrayOfChildren.length; i++)
 				result.push(arrayOfChildren[i])
 
@@ -439,10 +461,11 @@ function enqueue(env) {
 			 */
 			continue
 		}
-		
+
 		vars = vars.cdr()
 		vals = vals.cdr()
 	}
+
 	return result
 }
 
@@ -457,23 +480,20 @@ function translate(infile, outfile) {
 
 	let wjs = new WJS(outfile, global)
 
-	console.log('before wjs.performChecksAndSets()')
 	wjs.performChecksAndSets()
 
 	let dialog_nodes = new Lexeme(Type.ID, 'dialog_nodes', undefined, undefined, undefined)
 	let nodes = null
 	
-	if (Environment.prototype.exists(global, dialog_nodes))
+	if (wjs.dialogNodesPresent())
 		nodes = Environment.prototype.lookup(global, dialog_nodes)
 	
-	console.log('before enqueue(nodes)')
 	if (nodes != null)
 		nodes = enqueue(nodes)
 	
 	if (Environment.prototype.exists(global, dialog_nodes))
 		Environment.prototype.update(global, dialog_nodes, new Lexeme(Type.ARRAY, nodes, undefined, undefined, undefined))
 	
-	console.log('before wjs.translate()')
 	wjs.translate()
 }
 

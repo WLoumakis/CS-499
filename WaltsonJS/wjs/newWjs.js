@@ -937,6 +937,18 @@ Translator.prototype = {
 			case Type.MIXIN_LIST:
 				this.translateMixinList(tree)
 				break
+			case Type.OBJECT:
+				this.translateEvaluatedObject(tree)
+				break
+			case Type.ARRAY:
+				this.translateEvaluatedArray(tree)
+				break
+			case Type.ENVIRONMENT:
+				if (tree.getValue() == Type.OBJECT)
+					this.translateEnvironmentObject(tree)
+				else if (tree.getValue() == Type.ARRAY)
+					this.translateEnvironmentArray(tree)
+				break
 			default:
 				throw Error('Error translating type ' + tree.getType() + '!')
 		}
@@ -1088,6 +1100,88 @@ Translator.prototype = {
 				fs.appendFileSync(this.outfile, ',')
 			fs.appendFileSync(this.outfile, '\n')
 		}
+	},
+
+	translateEvaluatedArray: function(tree) {
+		fs.appendFileSync(this.outfile, '[')
+		if (tree.getValue().length != 0) {
+			this.numTabs++
+			fs.appendFileSync(this.outfile, '\n')
+			for (let i = 0; i < tree.getValue().length; i++) {
+				this.printTabs()
+				this.translate(tree.getValue()[i])
+				if (i < tree.getValue().length - 1)
+					fs.appendFileSync(this.outfile, ',')
+				fs.appendFileSync(this.outfile, '\n')
+			}
+			this.numTabs--
+			this.printTabs()
+			fs.appendFileSync(this.outfile, ']')
+		}
+		else
+			fs.appendFileSync(this.outfile, '[]')
+	},
+
+	translateEnvironmentObject: function(tree) {
+		fs.appendFileSync(this.outfile, '{')
+		let table = tree.car()
+		let vars = table.car()
+		let vals = table.cdr()
+		let flag = 0
+		if (vars != null) {
+			fs.appendFileSync(this.outfile, '\n')
+			this.numTabs++
+			flag = 1
+		}
+		while (vars != null) {
+			this.printTabs()
+			if (vars.car().getValue() != 'unbound') {
+				this.translate(vars.car())
+				fs.appendFileSync(this.outfile, ': ')
+			}
+			this.translate(vals.car())
+			vars = vars.cdr()
+			vals = vals.cdr()
+			if (vars != null)
+				fs.appendFileSync(this.outfile, ',')
+			fs.appendFileSync(this.outfile, '\n')
+		}
+		if (flag) {
+			this.numTabs--
+			this.printTabs()
+		}
+		fs.appendFileSync(this.outfile, '}')
+	},
+
+	translateEnvironmentArray: function(tree) {
+		fs.appendFileSync(this.outfile, '[')
+		let table = tree.car()
+		let vars = table.car()
+		let vals = table.cdr()
+		let flag = 0
+		if (vars != null) {
+			fs.appendFileSync(this.outfile, '\n')
+			this.numTabs++
+			flag = 1
+		}
+		while (vars != null) {
+			this.printTabs()
+			if (vars.car().getValue() != 'unbound') {
+				this.translate(vars.car())
+				fs.appendFileSync(this.outfile, ' = ')
+			}
+			this.translate(vals.car())
+			vars = vars.cdr()
+			vals = vals.cdr()
+			if (vars != null)
+				fs.appendFileSync(this.outfile, ',')
+			fs.appendFileSync(this.outfile, '\n')
+		}
+		if (flag) {
+			this.numTabs--
+			this.printTabs()
+		}
+		fs.appendFileSync(this.outfile, ']')
 	}
 
 }
@@ -1240,7 +1334,7 @@ Environment.prototype = {
 			let prevVal = null
 			while (vars != null) {
 				if (this.sameVariable(vars.car(), variable))
-					return deleteHelper(prevVar, prevVal, table)
+					return this.deleteHelper(prevVar, prevVal, table)
 				prevVar = vars
 				prevVal = vals
 				vars = vars.cdr()
@@ -1435,6 +1529,7 @@ WJS.prototype = {
 			else
 				fs.appendFileSync(this.outfile, ': ')
 			this.translator.translate(vals.car())
+			fs.appendFileSync(this.outfile, ';\n')
 			vars = vars.cdr()
 			vals = vals.cdr()
 		}
@@ -1457,19 +1552,12 @@ WJS.prototype = {
 	},
 
 	performChecksAndSets: function() {
-		console.log('before checkAndSetGlobal()')
 		this.checkAndSetGlobal()
-		console.log('after checkAndSetGlobal')
 		if (this.anyParamMissing()) {
-			console.log('before checkAndSetImplicitGlobalVars()')
 			this.checkAndSetImplicitGlobalVars()
-			console.log('after checkAndSetImplicitGlobalVars()')
 		}
-		console.log('after chceking for paramMissing and doing checkAndSetImplicitGlobalVars()')
 		if (this.anyParamMissing()) {
-			console.log('before checkOneAboveGlobal()')
 			this.checkOneAboveGlobal()
-			console.log('after checkOneAboveGlobal()')
 		}
 	},
 
