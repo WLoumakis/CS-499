@@ -37,7 +37,9 @@ var Type = {
 
 	EXPLICIT: 'EXPLICIT',
 	IMPLICIT: 'IMPLICIT',
-	EXPRESSION: 'EXPRESSION'
+	EXPRESSION: 'EXPRESSION',
+
+	GLUE: 'GLUE'
 	
 }
 
@@ -246,7 +248,7 @@ Lexer.prototype = {
 		return new Lexeme(Type.NUMBER, (real == 1) ? parseFloat(ret) : parseInt(ret), this.line, undefined, undefined)
 	},
 
-	lexVar: function() {
+	lexVarOrKey: function() {
 		let ch = this.readChar()
 		let ret = ""
 		let size = 64
@@ -259,6 +261,10 @@ Lexer.prototype = {
 			ch = this.readChar()
 		}
 		this.putBack(ch)
+		if (ret == 'true')
+			return new Lexeme(Type.TRUE, undefined, this.line, undefined, undefined)
+		if (ret == 'false')
+			return new Lexeme(Type.FALSE, undefined, undefined, undefined, undefined)
 		return new Lexeme(Type.ID, ret, this.line, undefined, undefined)
 	},
 
@@ -364,7 +370,7 @@ Lexer.prototype = {
 				}
 				else if (/\w/.test(ch)) {
 					this.putBack(ch)
-					return this.lexVar()
+					return this.lexVarOrKey()
 				}
 				else {
 					throw Error('Error on line ' + this.line + ': could not understand character ' + ch + '!')
@@ -1393,27 +1399,110 @@ Evaluator.prototype = {
 
 }
 
-var wjs = function(outfile, global) {
+var WJS = function(outfile, global) {
 	this.outfile = outfile
 	this.global = global
-	this.createWorkspace = true
+	this.iam_apikey = false
+	this.iam_access_token = false
+	this.iam_url = false
+	this.username = false
+	this.password = false
+	this.url = false
+	this.version = false
+	this.workspace_id = false
 	this.intents = false
 	this.entities = false
 	this.dialog_nodes = false
 	this.counterexamples = false
 }
 
-wjs.prototype = {
+WJS.prototype = {
 
-	checkGlobal: function() {
-		let workspace_id = new Lexeme(Type.ID, 'workspace_id', undefined, undefined, undefined)
-		this.createWorkspace = Environment.prototype.exists(this.global, workspace_id)
-		this.intents = checkIntents(this.global)
-		this.entities = checkEntities(this.global)
-		this.dialog_nodes = checkDialogNodes(this.global)
-		this.counterexamples = checkCounterexamples(this.global)
+	intentsPresent: function() {
+		return this.intents
 	},
 
+	entitiesPresent: function() {
+		return this.entities
+	},
+
+	dialogNodesPresent: function() {
+		return this.dialog_nodes
+	},
+
+	counterexamplesPresent: function() {
+		return this.counterexamples
+	},
+
+	performChecksAndSets: function() {
+		this.checkAndSetGlobal()
+		if (this.anyParamMissing()) {
+			this.checkAndSetImplicitGlobalVars()
+		}
+		if (this.anyParamMissing()) {
+			this.checkOneAboveGlobal()
+		}
+	},
+
+	anyParamMissing: function() {
+		return (!this.intents || !this.entities || !this.dialog_nodes || !this.counterexamples)
+	},
+
+	checkAndSetGlobal: function() {
+		this.iam_apikey = this.checkIamApikey(this.global)
+		this.iam_access_token = this.checkIamAccessToken(this.global)
+		this.iam_url = this.checkIamUrl(this.global)
+		this.username = this.checkUsername(this.global)
+		this.password = this.checkPassword(this.global)
+		this.url = this.checkUrl(this.global)
+		this.version = this.checkVersion(this.global)
+		this.workspace_id = this.checkWorkspaceId(this.global)
+		this.intents = this.checkIntents(this.global)
+		this.entities = this.checkEntities(this.global)
+		this.dialog_nodes = this.checkDialogNodes(this.global)
+		this.counterexamples = this.checkCounterexamples(this.global)
+	},
+
+	checkIamApikey: function(env) {
+		let iam_apikey = new Lexeme(Type.ID, 'iam_apikey', undefined, undefined, undefined)
+		return Environment.prototype.exists(env, iam_apikey)
+	},
+
+	checkIamAccessToken: function(env) {
+		let iam_access_token = new Lexeme(Type.ID, 'iam_access_token', undefined, undefined, undefined)
+		return Environment.prototype.exists(env, iam_access_token)
+	},
+
+	checkIamUrl: function(env) {
+		let iam_url = new Lexeme(Type.ID, 'iam_url', undefined, undefined, undefined)
+		return Environment.prototype.exists(env, iam_url)
+	},
+
+	checkUsername: function(env) {
+		let username = new Lexeme(Type.ID, 'username', undefined, undefined, undefined)
+		return Environment.prototype.exists(env, username)
+	},
+
+	checkPassword: function(env) {
+		let password = new Lexeme(Type.ID, 'password', undefined, undefined, undefined)
+		return Environment.prototype.exists(env, password)
+	},
+
+	checkUrl: function(env) {
+		let url = new Lexeme(Type.ID, 'url', undefined, undefined, undefined)
+		return Environment.prototype.exists(env, url)
+	},
+
+	checkVersion: function(env) {
+		let version = new Lexeme(Type.ID, 'version', undefined, undefined, undefined)
+		return Environment.prototype.exists(env, version)
+	},
+
+	checkWorkspaceId: function(env) {
+		let workspace_id = new Lexeme(Type.ID, 'workspace_id', undefined, undefined, undefined)
+		return Environment.prototype.exists(env, workspace_id)
+	},
+	
 	checkIntents: function(env) {
 		let intents = new Lexeme(Type.ID, "intents", undefined, undefined, undefined)
 		return Environment.prototype.existsLocal(env, intents)
@@ -1434,6 +1523,46 @@ wjs.prototype = {
 		return Environment.prototype.existsLocal(env, counterexamples)
 	},
 
+	checkAndSetImplicitGlobalVars: function() {
+		let table = this.global.car()
+		let vars = table.car()
+		let vals = table.cdr()
+		let watson_attr = 0
+		while (vars != null) {
+			if ((vars.car().getValue() == 'unbound'||
+				this.isWatsonParam(vars.car().getValue())) &&
+			   	(vals.car().getType() == Type.SKIP ||
+				vals.car().getType() == Type.ARRAY)) {
+					switch (watson_attr) {
+						case 0:
+							if (vars.car().getValue() == 'unbound')
+								vars.car().setValue('intents')
+							watson_attr++
+							break
+						case 1:
+							if (vars.car().getValue() == 'unbound')
+								vars.car().setValue('entities')
+							watson_attr++
+							break
+						case 2:
+							if (vars.car().getValue() == 'unbound')
+								vars.car().setValue('dialog_nodes')
+							watson_attr++
+							break
+						case 3:
+							if (vars.car().getValue() == 'unbound')
+								vars.car().setValue('counterexamples')
+							watson_attr++
+							break
+						default:
+							throw Error("Couldn't understand more than 4 implicit definitions!")
+					}
+					if (vals.car().getType() == Type.SKIP)
+						vals.setCar(new Lexeme(Type.ARRAY, [], undefined, undefined, undefined))
+			}
+		}
+	},
+
 	checkOneAboveGlobal: function() {
 		let valid = []
 		let table = this.global.car()
@@ -1446,6 +1575,9 @@ wjs.prototype = {
 			vals = vals.cdr()
 		}
 		for (let i = 0; i < valid.length; i++) {
+			if (this.workspace_id == false && this.checkWorkspaceId(valid[i].cdr())) {
+				this.flatten(valid[i])
+			}
 			if (this.intents == false && this.checkIntents(valid[i].cdr())) {
 				this.flatten(valid[i])
 			}
@@ -1458,48 +1590,23 @@ wjs.prototype = {
 			if (this.counterexamples == false && this.checkCounterexamples(valid[i].cdr())) {
 				this.flatten(valid[i])
 			}
+			//Environment.prototype.delete(this.global, valid[i].car())
 		}
-	},
-
-	checkAndSetImplicitGlobalVars: function() {
-		let table = this.global.car()
-		let vars = table.car()
-		let vals = table.cdr()
-		let watson_attr = 0
-		while (vars != null) {
-			if (vars.car().getValue() == "unbound" &&
-			   	(vals.car().getType() == Type.SKIP ||
-				vals.car().getType() == Type.ARRAY)) {
-					switch (watson_attr) {
-						case 0:
-							vars.car().setValue('intents')
-							watson_attr++
-							break
-						case 1:
-							vars.car().setValue('entities')
-							watson_attr++
-							break
-						case 2:
-							vars.car().setValue('dialog_nodes')
-							watson_attr++
-							break
-						case 3:
-							vars.car().setValue('counterexamples')
-							watson_attr++
-							break
-						default:
-							throw Error("Couldn't understand more than 4 implicit definitions!")
-					}
-					if (vals.car().getType() == Type.SKIP)
-						vals.setCar(new Lexeme(Type.ARRAY, [], undefined, undefined, undefined))
-			}
-		}
+		
 	},
 
 	flatten: function(tree) {
-		//Environment.prototype.insert(this.global, tree.car(), tree.cdr())
 		Environment.prototype.updateLocalSpecific(this.global, tree.car(), tree.cdr())
 	},
+
+	isWatsonParam: function(str) {
+		if (str == 'intents' ||
+			str == 'entities' ||
+			str == 'dialog_nodes' ||
+			str == 'counterexamples')
+				return true
+		return false
+	}
 
 }
 
@@ -1512,5 +1619,5 @@ module.exports = {
 	Environment: Environment,
 	Translator: Translator,
 	Evaluator, Evaluator,
-	wjs, wjs
+	WJS, WJS
 }

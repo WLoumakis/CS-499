@@ -1,9 +1,9 @@
-var {Lexeme} = require('./wjs')
-var {Type} = require('./wjs')
-var {Parser} = require('./wjs')
-var {Environment} = require('./wjs')
-var {Evaluator} = require('./wjs')
-var {wjs} = require('./wjs')
+var {Lexeme} = require('./newWjs')
+var {Type} = require('./newWjs')
+var {Parser} = require('./newWjs')
+var {Environment} = require('./newWjs')
+var {Evaluator} = require('./newWjs')
+var {WJS} = require('./newWjs')
 var fs = require('fs')
 var rl = require('readline-sync')
 
@@ -45,8 +45,14 @@ function enqueueHelper(node) {
 	let c = null
 	let ps = null
 
-	if (!Environment.prototype.existsLocal(node, workspace_id))
-		Environment.prototype.insert(node, workspace_id, workspace_id)
+    //FIXME: Dont' think I need this because of two reasons
+    //          1.  If creating a workspace, we don't know the id yet
+    //          2.  If we aren't creating, we're updating. Since the
+    //              updateWorkspace method takes a workspace, the nodes
+    //              don't need a workspace_id attribute.
+    if (!Environment.prototype.existsLocal(node, workspace_id) &&
+        Environment.prototype.exists(node, workspace_id))
+		    Environment.prototype.insert(node, workspace_id, workspace_id)
 
 	if (Environment.prototype.existsLocal(node, children))
 		c = Environment.prototype.lookupLocal(node, children).getValue()
@@ -75,6 +81,23 @@ function enqueueHelper(node) {
 	return result
 }
 
+function buildNodeObject(array, ind) {
+    let title = new Lexeme(Type.ID, 'title', undefined, undefined, undefined)
+    let dialog_node = new Lexeme(Type.ID, 'dialog_node', undefined, undefined, undefined)
+    let conditions = new Lexeme(Type.ID, 'conditions', undefined, undefined, undefined)
+    let t = array[ind++].car().getValue()
+    let dn = title
+    
+    // While not at the end of the array, and while we don't have
+    // an explicitly defined "name" attribute. . .
+    while (ind < array.length &&
+            (array[ind].getType() != Type.EXPLICIT ||
+                (array[ind].getType() == Type.EXPLICIT &&
+                array[ind].car().getValue() != 'name'))) {
+
+                }
+}
+
 function enqueue(nodes) {
 	let previous_sibling = new Lexeme(Type.ID, 'previous_sibling', undefined, undefined, undefined)
 	let dialog_node = new Lexeme(Type.ID, 'dialog_node', undefined, undefined, undefined)
@@ -84,6 +107,13 @@ function enqueue(nodes) {
 	let result = []
 
 	for (let i = 0; i < nodes.length; i++) {
+        let node = new Environment()
+        if (nodes[i].getType() == Type.EXPLICIT && nodes[i].car().getValue() == 'name') {
+            buildNodeObject(nodes, i)
+        }
+        else {
+
+        }
 		if (i != 0)
 			Environment.prototype.insert(nodes[i], previous_sibling, ps)
 		result.push(nodes[i])
@@ -104,20 +134,25 @@ function translate(infile, outfile) {
 	let global = new Environment()
 	evaluator.eval(tree, global)
 
-	let dialog_nodes = new Lexeme(Type.ID, 'dialog_nodes', undefined, undefined, undefined)
-	let nodes = null
+    let wjs = new WJS(outfile, global)
+
+    wjs.performChecksAndSets()
+
+    let dialog_nodes = new Lexeme(Type.ID, 'dialog_nodes', undefined, undefined, undefined)
+    let nodes = null
+    
 	if (Environment.prototype.exists(global, dialog_nodes))
 		nodes = Environment.prototype.lookup(global, dialog_nodes).getValue()
 	
 	if (nodes != null)
-		nodes = enqueue(nodes)
+		nodes = enqueue(Environment.prototype.lookup(nodes, dialog_nodes))
 	
 	if (Environment.prototype.exists(global, dialog_nodes))
 		Environment.prototype.update(global, dialog_nodes, new Lexeme(Type.ARRAY, nodes, undefined, undefined, undefined))
 
 	let translator = new wjs(outfile, global)
 	
-	translator.addVariables()
+    translator.addVariables()
 }
 
 function main() {
