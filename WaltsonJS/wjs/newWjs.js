@@ -1116,6 +1116,7 @@ Environment.prototype = {
 			vars.setCdr(Lexeme.prototype.cons(Type.ID_LIST, variable, null))
 			vals.setCdr(Lexeme.prototype.cons(Type.ID_LIST, value, null))
 		}
+		return value
 	},
 
 	lookup: function(env, variable) {
@@ -1389,12 +1390,12 @@ Evaluator.prototype = {
 	},
 
 	evalMixinList: function(list, env) {
-		let arr = []
+		let ret = null
 		while (list != null) {
-			arr.push(this.eval(list.car(), env))
+			ret = this.eval(list.car(), env)
 			list = list.cdr()
 		}
-		return new Lexeme(Type.ARRAY, arr, undefined, undefined, undefined)
+		return ret
 	}
 
 }
@@ -1414,9 +1415,30 @@ var WJS = function(outfile, global) {
 	this.entities = false
 	this.dialog_nodes = false
 	this.counterexamples = false
+	this.translator = new Translator(outfile)
+	this.inObject = false
 }
 
 WJS.prototype = {
+
+	translate: function() {
+		let table = this.global.car()
+		let vars = table.car()
+		let vals = table.cdr()
+		fs.writeFileSync(this.outfile, '')
+		while (vars != null) {
+			if (this.inObject == false)
+				fs.appendFileSync(this.outfile, 'var ')
+			this.translator.translate(vars.car())
+			if (this.inObject == false)
+				fs.appendFileSync(this.outfile, ' = ')
+			else
+				fs.appendFileSync(this.outfile, ': ')
+			this.translator.translate(vals.car())
+			vars = vars.cdr()
+			vals = vals.cdr()
+		}
+	},
 
 	intentsPresent: function() {
 		return this.intents
